@@ -83,3 +83,49 @@ extension UIViewController {
         self.navigationItem.rightBarButtonItem = item
     }
 }
+
+//MARK: -为UIViewController 提供一个alertView弹出
+//如果haveCancleBtn==false,则只需要用确定作为cancleBtn，并且不做任何操作a
+extension UIViewController {
+    public func commonAlertShow(haveCancleBtn:Bool,btnTitle1:String = "确定", btnTitle2:String = "取消", title: String, message: String, preferredStyle: UIAlertControllerStyle){
+        let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
+        if haveCancleBtn {
+            let action1 = UIAlertAction(title: btnTitle1, style: UIAlertActionStyle.Destructive, handler: { (UIAlertAction) -> Void in
+                self.alertDestructiveAction()
+            })
+            let action2 = UIAlertAction(title: btnTitle2, style: UIAlertActionStyle.Cancel, handler: nil)
+            alert.addAction(action1)
+            alert.addAction(action2)
+        }else{
+            let action = UIAlertAction(title: "确定", style: UIAlertActionStyle.Default, handler: {(UIAlertAction) -> Void in
+                self.alertSingleAction()
+            })
+            alert.addAction(action)
+        }
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    //点击commonAlert确定按钮执行的方法
+    public func alertDestructiveAction() {
+        print("alert确定")
+    }
+    public func alertSingleAction() {
+        print("alert取消")
+    }
+}
+
+
+extension UIViewController {
+    public func pushToVC(vc:UIViewController,animated:Bool = true,hideBottom:Bool = true) {
+        vc.hidesBottomBarWhenPushed = hideBottom
+        self.navigationController?.pushViewController(vc, animated: animated)
+    }
+}
+
+extension UIViewController {
+    public func botView(height:CGFloat = 56,backgroundColor:UIColor = defaultBackgroundGrayColor) -> UIView {
+        let view = UIView(frame: CGRect(x: 0, y: self.view.bounds.height-height, width: kScreenWidth, height: height))
+        view.backgroundColor = backgroundColor
+        return view
+    }
+}

@@ -13,6 +13,8 @@ class DiscountCardViewController: UIViewController,UITableViewDataSource, UITabl
     var manageBtn : UIButton!
     var coupons = NSArray()                         // 优惠券
     var finished : ((couponcode:String)->Void)!
+    
+    var haveCoupon = false
     override func viewDidLoad() {
         super.viewDidLoad()
         self.updateUI()
@@ -118,11 +120,35 @@ class DiscountCardViewController: UIViewController,UITableViewDataSource, UITabl
         self.currentTableView.delegate = self
         self.view.addSubview(self.currentTableView)
     }
+    
     func updateData() {
-        QNNetworkTool.fetchCustomerCouponsForOrder { (coupons, dictionary, error) -> Void in
-            if coupons != nil {
-                self.coupons = coupons!
-                self.currentTableView.reloadData()
+        dispatch_async(dispatch_get_global_queue(0, 0)) { () -> Void in
+            QNNetworkTool.fetchCustomerCouponsForOrder { (coupons, dictionary, error) -> Void in
+                if coupons != nil {
+                    self.coupons = coupons!
+                    if self.coupons.count == 0 {
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            self.haveCoupon = false
+                            let bgView = UIView(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: 140))
+                            bgView.center = self.view.center
+                            self.view.addSubview(bgView)
+                            bgView.tag = 1000
+                            let imgView = UIImageView(frame: CGRect(x: 0, y: 0, width: 120, height: 120))
+                            imgView.center.x = bgView.bounds.width/2
+                            imgView.image = UIImage(named: "sorry")
+                            bgView.addSubview(imgView)
+                            let lbl = UILabel(frame: CGRect(x: 0, y: 120, width: kScreenWidth, height: 20))
+                            lbl.text = "很抱歉,暂时没有可用的优惠券!"
+                            lbl.textColor = defaultTextColor
+                            lbl.font = defaultTextSize
+                            lbl.textAlignment = .Center
+                            bgView.addSubview(lbl)
+                        })
+                    } else {
+                        self.haveCoupon = true
+                        self.currentTableView.reloadData()
+                    }
+                }
             }
         }
     }

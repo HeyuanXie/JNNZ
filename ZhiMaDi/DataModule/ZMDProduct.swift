@@ -17,6 +17,7 @@ class ZMDProduct: NSObject {
     var ShowSku : NSNumber?             //
     var Sold : String!                  // 已售
     var IsFreeShipping : NSNumber? = 0  // 免邮
+//    var IsCollected : Bool!
     var ProductPrice : ZMDProductPrice?
     var DefaultPictureModel : ZMDPictureModel?
 

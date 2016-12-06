@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "0"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ZhiMaDi/Home/HomeBuyGoodsDetailViewController.swift"
+            timestampString = "494069552.010191"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "866"
+            endingLineNumber = "866"
+            landmarkName = "updateUI()"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ZhiMaDi.HomeBuyGoodsDetailViewController.(updateUI (ZhiMaDi.HomeBuyGoodsDetailViewController) -&gt; () -&gt; ()).(closure #1)"
+                  moduleName = "ZhiMaDi"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/xieheyuan/Desktop/HLB/HuLuBao/ZhiMaDi/Home/HomeBuyGoodsDetailViewController.swift"
+                  timestampString = "494070563.077718"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "866"
+                  endingLineNumber = "866"
+                  offsetFromSymbolStart = "4116">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ZhiMaDi.HomeBuyGoodsDetailViewController.(updateUI (ZhiMaDi.HomeBuyGoodsDetailViewController) -&gt; () -&gt; ()).(closure #1).(closure #1)"
+                  moduleName = "ZhiMaDi"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/xieheyuan/Desktop/HLB/HuLuBao/ZhiMaDi/Home/HomeBuyGoodsDetailViewController.swift"
+                  timestampString = "494070563.077908"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "867"
+                  endingLineNumber = "867"
+                  offsetFromSymbolStart = "25">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ZhiMaDi/UserCenter/ShoppingCar/ShoppingCartViewController.swift"
+            timestampString = "494069697.393858"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "212"
+            endingLineNumber = "212"
+            landmarkName = "dataUpdate()"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ZhiMaDi.ShoppingCartViewController.dataUpdate (ZhiMaDi.ShoppingCartViewController)() -&gt; ()"
+                  moduleName = "ZhiMaDi"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/xieheyuan/Desktop/HLB/HuLuBao/ZhiMaDi/UserCenter/ShoppingCar/ShoppingCartViewController.swift"
+                  timestampString = "494070563.078713"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "212"
+                  endingLineNumber = "212"
+                  offsetFromSymbolStart = "16">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ZhiMaDi.ShoppingCartViewController.(dataUpdate (ZhiMaDi.ShoppingCartViewController) -&gt; () -&gt; ()).(closure #1)"
+                  moduleName = "ZhiMaDi"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/xieheyuan/Desktop/HLB/HuLuBao/ZhiMaDi/UserCenter/ShoppingCar/ShoppingCartViewController.swift"
+                  timestampString = "494070563.078861"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "213"
+                  endingLineNumber = "213"
+                  offsetFromSymbolStart = "27">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ZhiMaDi/Tools/QNNetworkTool.swift"
+            timestampString = "494070563.060158"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "414"
+            endingLineNumber = "414"
+            landmarkName = "fetchMainPageInto(_:)"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static ZhiMaDi.QNNetworkTool.fetchMainPageInto (ZhiMaDi.QNNetworkTool.Type)((advertisementAll : Swift.Optional&lt;ZhiMaDi.ZMDAdvertisementAll&gt;, error : Swift.Optional&lt;__ObjC.NSError&gt;, dictionary : Swift.Optional&lt;__ObjC.NSDictionary&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "ZhiMaDi"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/xieheyuan/Desktop/HLB/HuLuBao/ZhiMaDi/Tools/QNNetworkTool.swift"
+                  timestampString = "494070563.064345"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "414"
+                  endingLineNumber = "414"
+                  offsetFromSymbolStart = "23">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static ZhiMaDi.QNNetworkTool.(fetchMainPageInto (ZhiMaDi.QNNetworkTool.Type) -&gt; ((advertisementAll : Swift.Optional&lt;ZhiMaDi.ZMDAdvertisementAll&gt;, error : Swift.Optional&lt;__ObjC.NSError&gt;, dictionary : Swift.Optional&lt;__ObjC.NSDictionary&gt;) -&gt; ()) -&gt; ()).(closure #1)"
+                  moduleName = "ZhiMaDi"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/xieheyuan/Desktop/HLB/HuLuBao/ZhiMaDi/Tools/QNNetworkTool.swift"
+                  timestampString = "494070563.064567"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "414"
+                  endingLineNumber = "414"
+                  offsetFromSymbolStart = "39">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

@@ -19,6 +19,10 @@ var g_isLogin: Bool! { return g_customerId != nil }
 /// 当前账号
 var g_customerId : Int? // 408
 var g_customer : ZMDCustomer?
+/*
+g_isLogin :是否处于登陆状态
+g_Password: 是否成功登陆过
+*/
 // MARK: - 账号 & 账号管理
 private let kKeyAccount = ("Account" as NSString).encrypt(g_SecretKey)
 /// 账号（登录成功的）

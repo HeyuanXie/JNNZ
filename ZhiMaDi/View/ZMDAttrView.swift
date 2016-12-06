@@ -40,11 +40,11 @@ class ZMDAttrView: UIView {
         
         let SetSelectBtn = { (btn : UIButton) in
             if self.selectBtn != nil && self.selectBtn == btn {
-                self.selectBtn = nil
-                self.redLine.hidden = true
-                if self.finished != nil {
-                    self.finished(index: btn.tag - 1000,isAdd: false)
-                }
+//                self.selectBtn = nil
+//                self.redLine.hidden = true
+//                if self.finished != nil {
+//                    self.finished(index: btn.tag - 1000,isAdd: false)
+//                }
             } else {
                 self.redLine.hidden = false
                 self.selectBtn = btn
@@ -59,6 +59,7 @@ class ZMDAttrView: UIView {
                     }
 //                })
                 if self.finished != nil {
+                    self.finished(index: 1-btn.tag+1000,isAdd: false)
                     self.finished(index: btn.tag - 1000,isAdd: true)
                 }
             }
@@ -82,12 +83,17 @@ class ZMDAttrView: UIView {
             let sizeTmp = title.sizeWithFont(UIFont.systemFontOfSize(16), maxWidth: 150) //名宽度
             let xTmp = x + space * 2 + sizeTmp.width + 20
             let btn = getBtn(title,index)
-            btn.userInteractionEnabled = false
-            for tmpIndex in self.menuIndexTrue {
-                if (tmpIndex as! Int) == index {
-                    btn.userInteractionEnabled = true
-                    btn.setTitleColor(defaultTextColor, forState: .Normal)
-                }
+//            btn.userInteractionEnabled = false
+//            for tmpIndex in self.menuIndexTrue {
+//                if (tmpIndex as! Int) == index {
+//                    btn.userInteractionEnabled = true
+//                    btn.setTitleColor(defaultTextColor, forState: .Normal)
+//                }
+//            }
+            if index.isIn(self.menuIndexTrue){
+                btn.setTitleColor(defaultTextColor, forState: .Normal)
+            }else{
+                btn.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
             }
             btn.tag = 1000 + index
             if xTmp < self.frame.width {

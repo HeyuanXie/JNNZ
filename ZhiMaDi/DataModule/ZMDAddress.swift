@@ -18,6 +18,17 @@ class ZMDAddress: NSObject {
     var PhoneNumber:String!      //13685685685,
     var IsDefault:NSNumber!        //false,
     var AreaCode:String?         //110101001,
-    var Id:NSNumber?               //1
+    var Id:NSNumber!               //1
     var FaxNumber:String?
+}
+
+class ZMDDSAddress: NSObject {
+    var Id:NSNumber!    //7
+    var Name:String!    //"对方"
+    var Phone:String!   //"广东省广州市"
+    var Address1:String!
+    var Address2:String!
+    var AreaCode:String?
+    var AreaName:String?
+    var StoreId:NSNumber?
 }

@@ -1,3 +1,4 @@
+
 //
 //  HomeBuyGoodsDetailViewController.swift
 //  ZhiMaDi
@@ -9,8 +10,32 @@
 import UIKit
 import TYAttributedLabel
 import MJRefresh
+import WebKit
+
+//Int的extension，判断当前int值是否在range范围内
+extension Int {
+    func isIn(range:NSArray)->Bool{
+        var index = 0
+        for item in range {
+            if item as! Int == self {
+                break
+            }
+            index++
+        }
+        if index == range.count {
+            return false
+        }else{
+            return true
+        }
+    }
+}
+
 //商品详请
 class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,UITableViewDelegate,QNShareViewDelegate,ZMDInterceptorProtocol{
+    
+    //MAKR:特殊cell的高度,需要实时改变的
+    var specialCellHeights : [String:CGFloat] = ["detailCell":140,"scoreTableCell":40]
+    
     enum GoodsCellType{
         case HomeContentTypeAd                      /* 广告显示页 */
         case HomeContentTypeDetail                   /* 菜单参数栏目 */
@@ -18,6 +43,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         case HomeContentTypeDistribution             /* 商品配送栏目 */
         case HomeContentTypeStore                   /* 店家  */
         case HomeContentTypeDaPeiGou               /* 搭配购商品 */
+        case HomeContentTypeLoadMore
         init(){
             self = HomeContentTypeAd
         }
@@ -29,8 +55,10 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         }
     }
     @IBOutlet weak var currentTableView: UITableView!
-    var secondTableView: UITableView!
-    var countForBounghtLbl : UIButton!               // 购买数量Lbl
+    var secondTableView: UITableView!                  //上拉加载的下面一个tableView
+    var scoreTableView: UITableView!                    //SecondTable上的评分tableView
+//    var countForBounghtLbl : UIButton!               // 购买数量Lbl
+    @IBOutlet weak var countForShoppingCar: UILabel!                  //购物车数量
     @IBOutlet weak var bottomV: UIView!
     var productAttrV : ZMDProductAttrView!
     var kTagEditViewShow = 100001
@@ -43,38 +71,64 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
     var productId : Int!
     var productDetail : ZMDProductDetail!
     var attrSelectArray = NSMutableArray()          // 属性选择
+    var collects = NSMutableArray()
+
+    var isCollected = false        //判断是否已经收藏
+    var shoppingItemId: NSNumber!
+    var isSecondTableView = false   //当前是否为第二个tableView
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.updateUI()
-        self.dataInit()
     }
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
+        self.getShoppingCartNumber()
+        self.dataInit()
+        self.getBackView((self.navigationController?.navigationBar)!)
+        //从购物车返回到secondTableView中，在这里设置navigationBar
+        if self.isSecondTableView {
+            self.setupNavigation()
+            if self.navBackView != nil && self.navLine != nil {
+                self.navLine.hidden = false
+                self.navBackView.backgroundColor = UIColor.whiteColor()
+                self.navBackView.alpha = 1.0
+            }
+        }else{
+            self.setupNavigationWithBg()            //如果登陆了,在dataInit中-->wheatherIsCollected中会执行setupNavigationWithBg
+                                                    //如果没登录，就要在这里设置navigationBar
+        }
     }
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        self.getBackView((self.navigationController?.navigationBar)!)
-        self.setupNavigationWithBg()
     }
+    
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(true)
-        self.navBackView.alpha = 1.0
-        self.navLine.alpha = 1.0
-        self.navLine.hidden = false
+        if self.navBackView != nil && self.navLine != nil {
+            self.navBackView.alpha = 1.0
+            self.navLine.alpha = 1.0
+            self.navLine.hidden = false
+        }
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     //MARK:- Action
+    //进入购物车(不是添加商品到购物车)
     @IBAction func AddProductToCard(sender: UIButton) {
         // 购物车
         let vc = ShoppingCartViewController.CreateFromMainStoryboard() as! ShoppingCartViewController
         self.navigationController?.pushViewController(vc, animated: true)
     }
+    
     //MARK:- UITableViewDataSource,UITableViewDelegate
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == self.secondTableView {
+            return 1
+        }
+        if tableView == self.scoreTableView {
             return 1
         }
         
@@ -97,6 +151,9 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         if tableView == self.secondTableView {
             return 2
         }
+        if tableView == self.scoreTableView {
+            return 1
+        }
         
         return self.goodsCellTypes.count
     }
@@ -104,12 +161,17 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         if tableView == self.secondTableView {
             return 10
         }
+        //scoreTable的”好评率“
+        if tableView == self.scoreTableView {
+            return 60
+        }
 
         let cellType = self.goodsCellTypes[section]
         switch cellType {
         case .HomeContentTypeAd :
             return 0
-        
+        case .HomeContentTypeLoadMore :
+            return 0
         default :
             return 16
         }
@@ -117,7 +179,12 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return  0
     }
+    
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        if self.scoreTableView != nil && tableView == self.scoreTableView {
+            return self.specialCellHeights["scoreTableCell"]! //tmpCell,没有评论时
+            //            return 325 //CommentViewCell
+        }
         if tableView == self.secondTableView {
             return indexPath.section == 0 ? 60 : kScreenHeight - 64 - 80 - 58
         }
@@ -127,7 +194,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         case .HomeContentTypeAd :
             return kScreenWidth
         case .HomeContentTypeDetail :
-            return 156
+            return self.specialCellHeights["detailCell"]!
         case .HomeContentTypeMenu :
             return ZMDProductAttrView.getHeight(self.productDetail) + 60
         case .HomeContentTypeDistribution :
@@ -136,18 +203,45 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             return 120
         case .HomeContentTypeDaPeiGou :
             return 60 + 144 + 56
+        case .HomeContentTypeLoadMore :
+            return 40
         }
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        //secondTableView的ScoreCell上的scoreTableView的delegate(页面中的第三个tableView)
+        if tableView == self.scoreTableView{
+//            return cellForScoreTableView(tableView, indexPath: indexPath)
+            let tmpCell = UITableViewCell(style: .Default, reuseIdentifier: "tmpCell")
+            tmpCell.textLabel?.text = "这是第一次检讨此商品"
+            return tmpCell
+        }
+        
+        //第二个table
         if tableView == self.secondTableView {
-            if indexPath.section == 0 {
-               return cellForHomeNextMenu(tableView, indexPath: indexPath)
-            } else {
-                return cellForSecondDetail(tableView, indexPath: indexPath)
+            switch self.secondCellType {
+            case .SecondDetail:
+                if indexPath.section == 0 {
+                    return cellForHomeNextMenu(tableView, indexPath: indexPath)
+                } else {
+                    return cellImageTextForSecond(tableView, indexPath: indexPath)
+                }
+            case .SecondScore:
+                if indexPath.section == 0 {
+                    return cellForHomeNextMenu(tableView, indexPath: indexPath)
+                } else {
+                    return cellScoreForSecond(tableView, indexPath: indexPath)
+                }
+            default:
+                if indexPath.section == 0 {
+                    return cellForHomeNextMenu(tableView, indexPath: indexPath)
+                } else {
+                    return cellParmForSecond(tableView, indexPath: indexPath)
+                }
             }
         }
-
+        
+        //第一个table
         let cellType = self.goodsCellTypes[indexPath.section]
         switch cellType {
         case .HomeContentTypeAd :
@@ -162,13 +256,51 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             return cellForHomeStore(tableView, indexPath: indexPath)
         case .HomeContentTypeDaPeiGou :
             return cellForHomeDapeigou(tableView, indexPath: indexPath)
+        case .HomeContentTypeLoadMore :
+            return cellForHomeLoadMore(tableView,indexPath: indexPath)
         }
     }
+    
+        func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if tableView == self.scoreTableView{
+            let view = UIView(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: 61))
+            view.backgroundColor = UIColor.whiteColor()
+
+            let percentLabel = ZMDTool.getLabel(CGRect(x: 0, y: 0, width: kScreenWidth * 1 / 3, height: 60), text: "好评率: 0%", fontSize: 15)
+            percentLabel.textAlignment = .Center
+            percentLabel.attributedText = percentLabel.text?.AttributedMutableText([percentLabel.text!,"0%"], colors: [defaultTextColor,.redColor()])
+            view.addSubview(percentLabel)
+
+            let allBtn = ZMDTool.getButton(CGRect(x: kScreenWidth/2 + 5 , y: 15, width: (kScreenWidth/2 - 20)/2, height: 30), textForNormal: "全部 (0)", fontSize: 15, backgroundColor: .whiteColor(), blockForCli: { (sender) -> Void in
+                
+            })
+            let attributeString = allBtn.titleLabel?.text?.AttributeText(["全部"," (0)"], colors: [defaultTextColor,UIColor.lightGrayColor()], textSizes: [15,13])
+            allBtn.titleLabel?.attributedText = attributeString
+            ZMDTool.configViewLayer(allBtn)
+            ZMDTool.configViewLayerFrameWithColor(allBtn, color: UIColor.darkGrayColor())
+            view.addSubview(allBtn)
+            
+            let imgBtn = ZMDTool.getButton(CGRect(x: CGRectGetMaxX(allBtn.frame) + 10, y: 15, width: CGRectGetWidth(allBtn.frame), height: 30), textForNormal: "晒图", fontSize: 15, backgroundColor: .whiteColor(), blockForCli: { (sender) -> Void in
+                
+            })
+            ZMDTool.configViewLayer(imgBtn)
+            ZMDTool.configViewLayerFrameWithColor(imgBtn, color: UIColor.darkGrayColor())
+            view.addSubview(imgBtn)
+            
+            let line = ZMDTool.getLine(CGRect(x: 0, y: 60, width: kScreenWidth, height: 1))
+            view.addSubview(line)
+            return view
+        }
+        return nil
+    }
+    
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let cellType = self.goodsCellTypes[indexPath.section]
         switch cellType {
         case .HomeContentTypeStore :
             let vc = StoreShowHomeViewController.CreateFromMainStoryboard() as! StoreShowHomeViewController
+            vc.storeId = self.productDetail.Store.Id
+            vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         default :
             break
@@ -181,48 +313,117 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         }
         var alaph = (scrollView.contentOffset.y) / 150.0
         alaph = alaph > 1 ? 1 : alaph
-        if self.navBackView != nil {
+        if alaph > 0.5 {
+            self.setupNavigation()
+        }else{
+            self.setupNavigationWithBg()
+        }
+        if self.navBackView != nil && self.navLine != nil {
             if alaph == 0 {
                 self.navLine.hidden = true
             } else {
                 self.navLine.alpha = alaph
                 self.navLine.hidden = false
             }
-            if alaph > 0.5 {
-                self.setupNavigation()
-            } else {
-                self.setupNavigationWithBg()
-            }
             self.navBackView.alpha = alaph
         }
     }
+    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        if let cell = self.currentTableView.visibleCells.last {
+            if cell.reuseIdentifier == "loadMoreCell" {
+                self.currentTableView.mj_footer.hidden = false
+            } else {
+                self.currentTableView.mj_footer.hidden = true
+            }
+        }
+    }
+    
     //MARK: QNShareViewDelegate
+    //分享的body，返回一个data，通过data.image可以取到image
     func qnShareView(view: ShareView) -> (image: UIImage, url: String, title: String?, description: String)? {
-        return (UIImage(named: "Share_Icon")!, "http://www.baidu.com", self.title ?? "", "成为喜特用户，享有更多服务!")
+        if let productDetail = self.productDetail {
+            let imgUrl = kImageAddressMain + (productDetail.DetailsPictureModel?.DefaultPictureModel!.ImageUrl)!
+            let image = UIImage(data: NSData(contentsOfURL: NSURL(string: imgUrl)!)!)
+            let title = productDetail.Name
+            let url = "\(kImageAddressMain)/\(productDetail.Id.integerValue)"
+            let description = productDetail.description
+            return (image!,url,title,description)
+        }else{
+            return (UIImage(named: "Share_Icon")!, kImageAddressMain, self.title ?? "", "疆南市场,物美价廉!")
+        }
+    }
+    
+    func present(alert: UIAlertController) -> Void {
+        self.presentViewController(alert, animated: false, completion: nil)
     }
     //MARK: -  PrivateMethod
     //MARK: Second cell
-    
-    func cellForSecondDetail(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
-        let cellId = "SecondDetailCell"
+    func cellImageTextForSecond(tableView:UITableView,indexPath:NSIndexPath)-> UITableViewCell {
+        let cellId = "SecondImageTextCell"
         var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
-        if cell == nil {
+        if cell == nil{
             cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
             cell!.selectionStyle = .None
-            cell!.contentView.backgroundColor = UIColor.whiteColor()
+            cell!.contentView.backgroundColor = UIColor.grayColor()
             
-            let webView = UIWebView(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: kScreenWidth - 64 - 70 - 58))
+            let height = kScreenHeight - 64 - 80 - 58
+            //加载图文详情
+            let jScript = "var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width'); document.getElementsByTagName('head')[0].appendChild(meta);"
+            let wkScript = WKUserScript(source: jScript, injectionTime: .AtDocumentEnd, forMainFrameOnly: true)
+            let wkUserContentVC = WKUserContentController()
+            wkUserContentVC.addUserScript(wkScript)
+            let wkWebViewConfig = WKWebViewConfiguration()
+            wkWebViewConfig.userContentController = wkUserContentVC
+            
+            let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: height), configuration: wkWebViewConfig)
+            webView.scrollView.contentSize = CGSizeMake(kScreenWidth, webView.scrollView.contentSize.height)
+            webView.scrollView.showsVerticalScrollIndicator = false
             cell?.contentView.addSubview(webView)
-            //self.productId
-            QNNetworkTool.fetchProductDetailView(34) { (succeed, data, error) -> Void in
-                if succeed! {
-                    webView.loadHTMLString(data!, baseURL: nil)
-                }
-            }
+            self.updateDetailView(webView)
         }
         return cell!
     }
-    //MARK:  下一页菜单 cell
+    
+    func cellScoreForSecond(tableView:UITableView,indexPath:NSIndexPath)-> UITableViewCell {
+        let cellId = "SecondScoreCell"
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+        if cell == nil{
+            cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
+            cell?.selectionStyle = .None
+            cell?.contentView.backgroundColor = UIColor.whiteColor()
+            
+            let height = kScreenHeight - 64 - 80 - 58
+            self.scoreTableView = UITableView(frame: CGRectMake(0, 0, kScreenWidth, height), style: UITableViewStyle.Plain)
+            cell?.contentView.addSubview(self.scoreTableView)
+            
+            scoreTableView.delegate = self
+            scoreTableView.dataSource = self
+        }
+        return cell!
+    }
+    
+    func cellParmForSecond(tableView:UITableView,indexPath:NSIndexPath)->UITableViewCell {
+        let cellId = "ParmSecondCell"
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+        if cell == nil{
+            cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
+            cell?.selectionStyle = .None
+            cell?.contentView.backgroundColor =  UIColor.whiteColor()
+            
+            let height = kScreenHeight - 64 - 80 - 58
+            let parmView = UIView(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: height))
+            parmView.backgroundColor = defaultBackgroundGrayColor
+        }
+        return cell!
+    }
+    
+    func updateDetailView(webView:WKWebView) {
+        let urlString = kImageAddressMain + "/product/ProductDetailview?productId=\(self.productId)"
+        let requeset = NSURLRequest(URL: NSURL(string: urlString)!)
+        webView.loadRequest(requeset)
+    }
+    //MARK:  secondTable 的菜单选择cell
     func cellForHomeNextMenu(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
         let cellId = "NextMenuCell"
         var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
@@ -251,6 +452,19 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         return cell!
     }
 
+    //MARK: scoreTableView的cell
+    func cellForScoreTableView(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
+        let cellId = "scoreCell"
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+        if cell == nil {
+            cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
+            cell?.selectionStyle = .None
+            let scoreView = NSBundle.mainBundle().loadNibNamed("CommentView", owner: nil, options: nil).first as! UIView
+            cell?.contentView.addSubview(scoreView)
+        }
+        return cell!
+    }
+    
     //MARK: 广告 cell
     func cellForHomeAd(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
         let cellId = "productImgCell"
@@ -294,7 +508,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         }
         return cell
     }
-    //MARK: 商品购买选项 cell
+    //MARK: 商品购买选项 cell(购买数量、颜色尺寸)
     func cellForHomeMenu(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
         let cellId = "menuOtherCell"
         var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
@@ -309,6 +523,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         }
         return cell!
     }
+    
     func editViewShow(productDetail:ZMDProductDetail,SciId:Int) -> UIView {
         let editView = UIView(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: ZMDProductAttrView.getHeight(productDetail) + 60))
         editView.tag = kTagEditViewShow
@@ -328,9 +543,8 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         editView.addSubview(countView)
         
         let countLbl = UILabel(frame: CGRect(x: 12, y: CGRectGetMaxY(productAttrV.frame), width: 200, height: 60))
-        let kucunText = "（库存量: 15）"
-        let countText = "购买数量\(kucunText)"
-        countLbl.attributedText = countText.AttributedMutableText(["购买数量",countText], colors: [defaultTextColor,defaultDetailTextColor])
+        countLbl.textColor = defaultTextColor
+        countLbl.text = "购买数量"
         countLbl.font = defaultSysFontWithSize(16)
         editView.addSubview(countLbl)
         return editView
@@ -343,30 +557,45 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
             cell!.selectionStyle = .None
             cell!.contentView.backgroundColor = UIColor.whiteColor()
+            let label = UILabel(frame: CGRect(x: 12, y: 24, width: 200, height: 60))
+            label.text = "配送"
+            label.textColor = defaultTextColor
+            label.font = defaultSysFontWithSize(17)
+            cell?.contentView.addSubview(label)
+            let size = "配送".sizeWithFont(label.font, maxWidth: 100)
+            let detailLbl = UILabel(frame: CGRect(x: 12 + size.width + 20, y: 24, width: kScreenWidth - (12 + size.width + 20) - 20 , height: 60))
+            detailLbl.numberOfLines = 0
+            let storeName = self.productDetail.Store.Name
+            let deliveryTime = self.productDetail.DeliveryTime ?? "3-6个工作日"
+            if storeName == nil {
+                detailLbl.text = "商品下单后预计3~6天送达"
+            }else{
+                detailLbl.text = "此商品由\(storeName)发货,预计下单后\(deliveryTime)送达"
+            }
+            detailLbl.textColor = defaultDetailTextColor
+            detailLbl.font = defaultSysFontWithSize(16)
+            if storeName != nil {
+                detailLbl.attributedText = detailLbl.text?.AttributeText([storeName,deliveryTime], colors: [defaultTextColor,defaultTextColor], textSizes: [15,15])
+            }
+            cell?.contentView.addSubview(detailLbl)
         }
-        let label = UILabel(frame: CGRect(x: 12, y: 24, width: 200, height: 17))
-        label.text = "配送"
-        label.textColor = defaultTextColor
-        label.font = defaultSysFontWithSize(17)
-        cell?.contentView.addSubview(label)
-        let size = "配送".sizeWithFont(label.font, maxWidth: 100)
-        let detailLbl = UILabel(frame: CGRect(x: 12 + size.width + 20, y: 24, width: kScreenWidth - (12 + size.width + 20) - 20 , height: 40))
-        detailLbl.numberOfLines = 2
-        detailLbl.text = "此商品由芝麻地发货"
-        detailLbl.textColor = defaultTextColor
-        detailLbl.font = defaultSysFontWithSize(17)
-        cell?.contentView.addSubview(detailLbl)
         return cell!
     }
     //MARK: 店家 cell
     func cellForHomeStore(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
         let cellId = "storeCell"
-        var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
-        if cell == nil {
-            cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
-            cell!.selectionStyle = .None
-            cell!.contentView.backgroundColor = UIColor.whiteColor()
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+        ZMDTool.configTableViewCellDefault(cell!)
+        let storeLbl = cell?.contentView.viewWithTag(10000) as! UILabel
+        if let productDetail = self.productDetail {
+            storeLbl.text = productDetail.Store.Name
         }
+        
+        (cell!.viewWithTag(100) as! UIButton).rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+            //展开店铺活动全部信息
+            
+            return RACSignal.empty()
+        })
         return cell!
     }
     //MARK: 搭配购 cell
@@ -451,92 +680,174 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         }
         return cell!
     }
+    
+    func cellForHomeLoadMore(tableView:UITableView,indexPath:NSIndexPath)->UITableViewCell{
+        let cellId = "loadMoreCell"
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+        let btn = cell?.contentView.viewWithTag(100) as! UIButton
+        btn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+            self.footerRefresh()
+            return RACSignal.empty()
+        })
+        return cell!
+    }
+    //MARK:第二个table的menu
     func createFilterMenu() -> UIView{
         let titles = ["图文详情","评分","相关推荐"]
+        var btnArr = NSMutableArray()
         let view = UIView(frame: CGRectMake(0 , 0, kScreenWidth, 60))
         for var i=0;i<titles.count;i++ {
-            let btn = UIButton(frame:  CGRectMake(CGFloat(i) * kScreenWidth/3 , 0, kScreenWidth/3, 60))
+            let btn = UIButton(frame:  CGRectMake(CGFloat(i) * kScreenWidth/3 , 0, kScreenWidth/3-3, 60))
+            //默认第一个是selected
+            if i == 0 {
+                btn.selected = true
+            }
             btn.backgroundColor = UIColor.clearColor()
             btn.setTitle(titles[i], forState: .Normal)
             btn.setTitle(titles[i], forState: .Normal)
             btn.setTitleColor(UIColor.blackColor(), forState: .Normal)
-            btn.setTitleColor(UIColor.yellowColor(), forState: .Selected)
+            btn.setTitleColor(defaultSelectColor, forState: .Selected)
             btn.titleLabel?.font = UIFont.systemFontOfSize(17)
+            btn.tag = 1000 + i
+            btnArr.addObject(btn)
             view.addSubview(btn)
             
-            btn.rac_signalForControlEvents(.TouchUpInside).subscribeNext({ (sender) -> Void in
-                self.secondCellType
-            })
             if i < 2{
-                let lineView = UIView(frame: CGRectMake(CGFloat(i + 1) * kScreenWidth/3, 18, 0.5, 21))
+                let lineView = UIView(frame: CGRectMake(CGFloat(i + 1) * kScreenWidth/3, 18, 1, 21))
                 lineView.backgroundColor = defaultLineColor
                 view.addSubview(lineView)
             }
+            
+            btn.rac_signalForControlEvents(.TouchUpInside).subscribeNext({ (sender) -> Void in
+                let btnClicked = sender as! UIButton
+                self.secondCellType = [SecondCellType.SecondDetail,.SecondScore,.SecondParameter][btnClicked.tag - 1000]
+                for btn in btnArr {
+                    let theBtn = btn as! UIButton
+                    if btnClicked.titleLabel?.text != theBtn.titleLabel?.text {
+                        theBtn.selected = false
+                    }else{
+                        theBtn.selected = true
+                    }
+                }
+                self.secondTableView.reloadData()
+            })
         }
         return view
     }
+    //MARK:第二个table的navigation
     func setupNavigation() {
         let item = UIBarButtonItem(image: UIImage(named: "Navigation_Back")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
         item.customView?.tintColor = UIColor.whiteColor()
         self.navigationItem.leftBarButtonItem = item
-        
-        let rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_03")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        let rightItem: UIBarButtonItem
+        if self.isCollected {
+            //收藏状态下的rightItem
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_04")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }else{
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_03")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }
         rightItem.customView?.tintColor = UIColor.whiteColor()
         self.navigationItem.rightBarButtonItem = rightItem
     }
+    
+    //MARK:第一个table的navigation
     func setupNavigationWithBg() {
-        let item = UIBarButtonItem(image: UIImage(named: "product_return")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
+        let item = UIBarButtonItem(image: UIImage(named: "product_return")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
         item.customView?.tintColor = UIColor.whiteColor()
         self.navigationItem.leftBarButtonItem = item
-        let rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_01")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        
+        let rightItem: UIBarButtonItem
+        if self.isCollected {
+            //收藏状态下的rightItem
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_02")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }else{
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_01")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }
         rightItem.customView?.tintColor = UIColor.whiteColor()
         self.navigationItem.rightBarButtonItem = rightItem
     }
     private func dataInit(){
-        self.goodsCellTypes = [.HomeContentTypeAd,.HomeContentTypeDetail,.HomeContentTypeMenu,/*.HomeContentTypeDistribution,.HomeContentTypeStore,.HomeContentTypeDaPeiGou*/]
+        self.goodsCellTypes = [.HomeContentTypeAd,.HomeContentTypeDetail,.HomeContentTypeMenu,.HomeContentTypeDistribution,/*.HomeContentTypeStore,.HomeContentTypeDaPeiGou*/.HomeContentTypeLoadMore]
+        
         QNNetworkTool.fetchProductDetail(self.productId) { (productDetail, error, dictionary) -> Void in
             if productDetail != nil {
                 self.productDetail = productDetail
                 if self.productDetail.ProductType?.integerValue == 15 {
-                    // 搭配产品
-                    self.goodsCellTypes = [.HomeContentTypeAd,.HomeContentTypeDetail,.HomeContentTypeMenu,/*.HomeContentTypeDistribution,.HomeContentTypeStore,*/.HomeContentTypeDaPeiGou]
+                    // 如果ProductType==15，有搭配产品，table的结构就如下：
+                    self.goodsCellTypes = [.HomeContentTypeAd,.HomeContentTypeDetail,.HomeContentTypeMenu,.HomeContentTypeDistribution,.HomeContentTypeDaPeiGou]
                 }
                 self.currentTableView.reloadData()
+                //当用户登录状态下，才判断这些商品是否收藏
+                if g_customerId != nil {
+                    //请求数据完成后判断是否已经收藏
+                    self.wheatherCollected()
+                }
+                //如果productAttrV还没显示出来就点击"加入购物车",会通过productAttr->getPostData得到参数，而productAttr为nil，会crash
+                if self.productAttrV == nil {
+                    self.editViewShow(self.productDetail, SciId: 0)
+                }
             } else {
+                
                 ZMDTool.showErrorPromptView(nil, error: error)
             }
         }
     }
+    //在第一个table上拉刷新
     func footerRefresh(){
         UIView.animateWithDuration(0.38, animations: { () -> Void in
             var frame = self.currentTableView.frame
+            //第一个table顶部是超出了64的，所以secondTable要+64
             frame.origin = CGPoint(x: 0, y: frame.origin.y + 64)
+            frame.size = CGSizeMake(kScreenWidth, kScreenHeight - 64 - 58)
             self.secondTableView.frame = frame
             frame.origin = CGPoint(x: 0, y: frame.origin.y - frame.size.height - 64)
             self.currentTableView.frame = frame
             }, completion: { (bool) -> Void in
                 self.currentTableView.mj_footer.endRefreshing()
-                if self.navBackView != nil {
+                self.setupNavigation()
+                if self.navBackView != nil && self.navLine != nil {
                     self.navLine.hidden = false
-                    self.setupNavigation()
+                    self.navBackView.backgroundColor = UIColor.whiteColor()
                     self.navBackView.alpha = 1.0
                 }
+                let btn = self.view.viewWithTag(10000)
+                self.view.bringSubviewToFront(btn!)
         })
+        self.isSecondTableView = true
     }
-    // 顶部刷新
+    // 在第二个table下拉刷新
     func headerRefresh(){
         UIView.animateWithDuration(0.38, animations: { () -> Void in
             var frame = self.secondTableView.frame
             frame.origin = CGPoint(x: 0, y: frame.origin.y - 64)
-            self.currentTableView.frame = frame
+            frame.size = CGSizeMake(kScreenWidth, kScreenHeight - 64)
+            self.currentTableView.frame = CGRect(x: 0, y: -64, width: kScreenWidth, height: kScreenHeight-64)
+            self.currentTableView.contentOffset = CGPoint(x: 0, y: 0)
             frame.origin = CGPoint(x: 0, y: 64 + frame.size.height)
             self.secondTableView.frame = frame
             }, completion: { (bool) -> Void in
                 self.secondTableView.mj_header.endRefreshing()
+                self.currentTableView.mj_footer.hidden = true
         })
-
+        self.isSecondTableView = false
     }
+    
+    //获取购物车数量
+    func getShoppingCartNumber() {
+        QNNetworkTool.fetchShoppingCartNumber { (number, dic, error) -> Void in
+            if let number = number {
+                self.countForShoppingCar.hidden = number == 0 ? true : false
+                self.countForShoppingCar.text = "\(number)"
+            }else{
+                self.countForShoppingCar.hidden = true
+            }
+        }
+    }
+    
     func updateUI() {
+        //设置购物车数量圆角
+        ZMDTool.configViewLayerRound(self.countForShoppingCar)
+        self.countForShoppingCar.hidden = true
         // 底部刷新
         let footer = MJRefreshAutoNormalFooter()
         // 顶部刷新
@@ -546,9 +857,11 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         
         self.currentTableView.backgroundColor  = tableViewdefaultBackgroundColor
         self.currentTableView.mj_footer = footer
+        self.currentTableView.mj_footer.hidden = true
        
         self.bottomV.backgroundColor = RGB(247,247,247,1)
-        secondTableView = UITableView(frame: CGRect(x: 0, y: CGRectGetMaxY(self.currentTableView.frame), width: kScreenWidth, height: self.currentTableView.frame.size.height))
+        
+        secondTableView = UITableView(frame: CGRect(x: 0, y: CGRectGetMaxY(self.currentTableView.frame) + 100, width: kScreenWidth, height: self.currentTableView.frame.size.height))
         secondTableView.separatorStyle = .None
         secondTableView.dataSource = self
         secondTableView.delegate = self
@@ -556,18 +869,21 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         self.secondTableView.mj_header = header
         self.secondTableView.reloadData()
         
+        scoreTableView = UITableView(frame: CGRectZero)
+        
         let titles = ["咨询","分享赚佣金","加入购物车"]
         var i = 0
         let colorsBg = [UIColor.clearColor(),RGB(225,188,42,1),RGB(232,61,60,1)]
         for title in titles {
-            if i < 2 {
-                i++
-                continue
-            }
-            let bottomBtn = UIButton(frame: CGRect(x: kScreenWidth/3 * CGFloat(i) + 18, y: 12, width: kScreenWidth/3 - 36, height: 34))
+            //加入购物车
+            let bottomBtn = UIButton(frame: CGRect(x: kScreenWidth/3 * CGFloat(i) + 18, y: 12, width: kScreenWidth/3 - 30, height: 34))
             bottomBtn.backgroundColor = UIColor.clearColor()
             bottomBtn.setTitle(title, forState: .Normal)
-            bottomBtn.titleLabel?.font = defaultSysFontWithSize(17)
+            if kScreenHeightZoom <= 1 {
+                bottomBtn.titleLabel?.font = defaultSysFontWithSize(14)
+            }else{
+                bottomBtn.titleLabel?.font = defaultSysFontWithSize(17)
+            }
             bottomBtn.backgroundColor = colorsBg[i]
             bottomBtn.tag = 1000 + i
             if i == 0 {
@@ -579,40 +895,87 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             }
             bottomBtn.rac_signalForControlEvents(.TouchUpInside).subscribeNext({ [weak self](sender) -> Void in
                 if (sender as! UIButton).titleLabel!.text == titles[0] {
-                    
+                    //咨询
+                    ZMDTool.showPromptView("该功能暂未开放")
                 } else if (sender as! UIButton).titleLabel?.text == titles[1] {
+                    //分享赚佣金
                     if let strongSelf = self {
                         let shareView = ShareView()
                         shareView.delegate = strongSelf
                         shareView.showShareView()
+//                        ZMDShareSDKTool.shareWithMenu(shareView)
                     }
                 } else if (sender as! UIButton).titleLabel?.text == titles[2] {
-                    if let strongSelf = self {
-                        let postDic = strongSelf.productAttrV.getPostData(strongSelf.countForBounght,IsEdit: false)
+                    //MARK:加入购物车
+                    if let strongSelf = self,productAttrV = strongSelf.productAttrV {
+                        if !g_isLogin {
+                            strongSelf.commonAlertShow(true, title: "提示:未登录!", message: "是否立即登录?", preferredStyle: .Alert)
+                            return
+                        }
+                        var postDic = productAttrV.getPostData(strongSelf.countForBounght,IsEdit: false)
                         if postDic == nil {
                             return
                         }
                         postDic!.setValue(strongSelf.productDetail.Id.integerValue, forKey: "Id")
-                        postDic!.setValue(1, forKey: "carttype")
-                        if g_isLogin! {
-                            QNNetworkTool.addProductToCart(postDic!, completion: { (succeed, dictionary, error) -> Void in
-                                if succeed! {
-                                    ZMDTool.showPromptView("添加成功")
-                                } else {
-                                    ZMDTool.showErrorPromptView(dictionary, error: error, errorMsg: "添加失败")
+                        postDic!.setValue(1, forKey: "CartType")
+                        ZMDTool.showActivityView(nil)
+                        QNNetworkTool.fetchShoppingCart(1, completion: { (shoppingItems, dictionary, error) -> Void in
+                            //判断购物车中是否已经有此商品
+                            var count = 0
+                            var theShoppingItem: ZMDShoppingItem!
+                            for item in shoppingItems! {
+                                let shoppingItem = item as! ZMDShoppingItem
+                                if shoppingItem.ProductId == strongSelf.productDetail.Id {
+                                    theShoppingItem = shoppingItem
+                                    break
                                 }
-                            })
-                        }
+                                count++
+                            }
+                            if count == shoppingItems?.count {
+                                //购物车中没有将要添加的商品，添加商品
+                                QNNetworkTool.addProductToCart(postDic!, completion: { (succeed, dictionary, error) -> Void in
+                                    ZMDTool.hiddenActivityView()
+                                    if succeed! {
+                                        strongSelf.getShoppingCartNumber()
+                                        ZMDTool.showPromptView("添加成功")
+                                    }else {
+                                        ZMDTool.showPromptView("添加失败")
+                                    }
+                                })
+                            }else{
+                                //购物车中已有将要添加的商品，修改商品
+                                postDic = strongSelf.productAttrV.getPostData(strongSelf.countForBounght, IsEdit: true)
+                                postDic?.setValue(theShoppingItem.Id.integerValue, forKey: "SciId")
+                                postDic?.setValue(NSNumber(int:theShoppingItem.Quantity.intValue + strongSelf.countForBounght), forKey: "Quantity")
+                                
+                                QNNetworkTool.editCartItemAttribute(postDic!, completion: { (succeed, dictionary, error) -> Void in
+                                    ZMDTool.hiddenActivityView()
+                                    if succeed!{
+                                        strongSelf.getShoppingCartNumber()
+                                        ZMDTool.showPromptView("添加成功")
+                                    }else{
+                                        ZMDTool.showPromptView("添加失败")
+                                    }
+                                })
+                            }
+                        })
                     }
                 }
             })
             self.bottomV.addSubview(bottomBtn)
+            //暂时隐藏咨询和分享
+            //isIn是Int的extension，判断int型的值是否在某个范围中
+            if i.isIn([1]){
+                bottomBtn.hidden = true
+            }
             i++
         }
     }
-    // 配置navigationBar
+    
+    // MARK:配置navigationBar透明与否
     func getBackView(superView : UIView) {
-        if superView.isKindOfClass(NSClassFromString("_UINavigationBarBackground")!) {
+        let backString = SYSTEM_VERSION_FLOAT >= 10.0 ? "_UIBarBackground" : "_UINavigationBarBackground"
+        if superView.isKindOfClass(NSClassFromString(backString)!) {
             for view in superView.subviews {
                 //移除分割线
                 if view.isKindOfClass(UIImageView.classForCoder()) {
@@ -630,23 +993,89 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             self.getBackView(view)
         }
     }
+    
+    //MARK:判断是否已经收藏
+    func wheatherCollected() {
+        //先遍历已经收藏的items,如果其中包含当前item，则self.isCollected = true
+        QNNetworkTool.fetchShoppingCart(2){(shoppingItems, dictionary, error) -> Void in
+            var index = 0
+            for shoppingItem in shoppingItems! {
+                if (shoppingItem as! ZMDShoppingItem).ProductName == (self.productDetail?.Name){
+                    self.isCollected = true
+                    self.shoppingItemId = shoppingItem.Id
+                    break
+                }
+                index++
+            }
+            if index == shoppingItems?.count{
+                self.isCollected = false
+            }
+            //设置navigation时必须判断为那个tableView，然后设置相应的导航栏
+            self.refreshNavigation()
+        }
+    }
+    
+    //MARK: refreshNavigation 收藏/取消收藏后刷新导航栏
+    func refreshNavigation() {
+        if self.isSecondTableView == false {
+            self.setupNavigationWithBg()
+        } else {
+            self.setupNavigation()
+        }
+    }
+    
+    //MARK: 重写 -alertDestructiveAction
+    override func alertDestructiveAction() {
+        ZMDTool.enterLoginViewController()
+    }
+    
+    //MARK:收藏和取消收藏
     func collect() {
         if g_isLogin! {
-            let dic = NSMutableDictionary()
-            dic.setValue(g_customerId!, forKey: "CustomerId")
-            dic.setValue(1, forKey: "Quantity")
-            dic.setValue(productDetail.Id.integerValue, forKey: "Id")
-            dic.setValue(2, forKey: "carttype")
-            QNNetworkTool.addProductToCart(dic, completion: { (succeed, dictionary, error) -> Void in
-                if succeed! {
-                    ZMDTool.showPromptView("添加成功")
-                } else {
-                    ZMDTool.showErrorPromptView(dictionary, error: error, errorMsg: "添加失败")
+            //先遍历已经收藏的items,如果其中包含当前item，则self.isCollected = true
+            QNNetworkTool.fetchShoppingCart(2){(shoppingItems, dictionary, error) -> Void in
+                for shoppingItem in shoppingItems! {
+                    if (shoppingItem as! ZMDShoppingItem).ProductName == self.productDetail.Name{
+                        self.isCollected = true
+                        self.shoppingItemId = shoppingItem.Id
+                        break
+                    }
                 }
-            })
+                if self.isCollected {
+                    //再次点击取消收藏
+                    self.isCollected = false
+                    QNNetworkTool.deleteCartItem(self.shoppingItemId.stringValue, carttype: 2, completion: { (succeed, dictionary, error) -> Void in
+                        if succeed != nil {
+                            ZMDTool.showPromptView("已取消收藏")
+                            self.refreshNavigation()
+                        }else{
+                            ZMDTool.showPromptView("取消收藏失败")
+                        }
+                    })
+                }else{
+                    self.isCollected = true
+                    let dic = NSMutableDictionary()
+                    dic.setValue(g_customerId!, forKey: "CustomerId")
+                    dic.setValue(1, forKey: "Quantity")
+                    dic.setValue(self.productDetail.Id.integerValue, forKey: "Id")
+                    dic.setValue(2, forKey: "CartType")
+                    QNNetworkTool.addProductToCart(dic, completion: { (succeed, dictionary, error) -> Void in
+                        if succeed! {
+                            ZMDTool.showPromptView("收藏成功")
+                            //收藏(取消收藏)完成，改变导航栏的rightItem
+                            self.refreshNavigation()
+                        } else {
+                            ZMDTool.showErrorPromptView(dictionary, error: error, errorMsg: "收藏失败")
+                        }
+                    })
+                }
+            }
+        } else {
+            self.commonAlertShow(true, title: "提示:未登录!", message: "是否立即登录?", preferredStyle: UIAlertControllerStyle.Alert)
         }
     }
 }
+
 class ContentTypeDetailCell: UITableViewCell {
     @IBOutlet weak var nameLbl: UILabel!
     @IBOutlet weak var priceLbl: UILabel!
@@ -663,13 +1092,18 @@ class ContentTypeDetailCell: UITableViewCell {
         cell.nameLbl.text = product.Name
         if let productPrice = product.ProductPrice {
             cell.priceLbl.text = "\(productPrice.Price)"
-            cell.priceLblWidthcon.constant = "\(productPrice.Price)".sizeWithFont(defaultSysFontWithSize(20), maxWidth: 200).width
+            cell.priceLblWidthcon.constant = "\(productPrice.Price)".sizeWithFont(defaultSysFontWithSize(20), maxWidth: 200).width + 5  //+5是因为有的计算出的width偏小，显示不全
             cell.layoutIfNeeded()
-            cell.oldPriceLbl.text = "原价:\(productPrice.OldPrice ?? "")"
+            let oldPrice = productPrice.OldPrice == nil ? productPrice.Price : productPrice.OldPrice
+            cell.oldPriceLbl.text = "原价:\(oldPrice)"
+            cell.oldPriceLbl.addCenterYLine()
         }
 
-        cell.soldCountLbl.text = "已售\(product.Sold)件"
-        cell.skuLbl.text = "商品货号:\(product.Sku ?? "")"
-        cell.isFreeLbl.text = product.IsFreeShipping!.boolValue ? "运费:免邮" : "运费:不免邮"
+        //商品货号放是否免邮、是否免邮放销售量、销售量为空、每件佣金隐藏
+        //免邮，isFreeLbl显示免邮，soldCountLbl显示销量
+        //不免邮,isFreeLbl显示销量,soldCountLbl为空
+        cell.isFreeLbl.text = product.IsFreeShipping!.boolValue ? "免邮" : "已售\(product.Sold)件"
+        cell.soldCountLbl.text = product.IsFreeShipping!.boolValue ? "已售\(product.Sold)件" : ""
+        cell.isFreeLbl.textColor = product.IsFreeShipping!.boolValue ? defaultSelectColor : RGB(79,79,79,1.0)
     }
 }

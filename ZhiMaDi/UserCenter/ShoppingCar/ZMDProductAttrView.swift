@@ -8,6 +8,7 @@
 
 import UIKit
 
+//选择产品属性View，(颜色、尺寸)
 class ZMDProductAttrView: UIView {
     var productDetail:ZMDProductDetail!
     var attrSelects = NSMutableArray()
@@ -125,6 +126,7 @@ class ZMDProductAttrView: UIView {
         catch {
         }
     }
+    
     func getPostData(quantity:Int,IsEdit:Bool = true) -> NSDictionary? {
         let dic = NSMutableDictionary()
         if productDetail.ProductVariantAttributes!.count != 0 {
@@ -138,16 +140,20 @@ class ZMDProductAttrView: UIView {
             }
         }
         if dic.count < self.productDetail.ProductVariantAttributes!.count {
-            ZMDTool.showPromptView("还有没选的")
+            ZMDTool.showPromptView("请选择商品规格")
             return nil
         }
         if IsEdit {
             dic.setValue(SciId, forKey: "SciId")
-        } 
-        dic.setValue(g_customerId!, forKey: "CustomerId")
+        }
+        //如果没登录，g_customerId = nil, 而下面g_customer是 ! 修饰，会crash，必须判断
+        if g_isLogin! {
+            dic.setValue(g_customerId!, forKey: "CustomerId")
+        }
         dic.setValue(quantity, forKey: "Quantity")
         return dic
     }
+    
     func getHeight() -> CGFloat {
         return  CGFloat(productDetail.ProductVariantAttributes!.count * 60)
     }

@@ -77,7 +77,7 @@ class OrderGoodsScoreViewController: UIViewController,UITextFieldDelegate,UIActi
         
         let goodsScoreTitleLbl = ZMDTool.getLabel(CGRect(x: 12, y: CGRectGetMaxY(headViewBg.frame)+27, width: 96, height: 17), text: "商品质量 :", fontSize: 17)
         self.view.addSubview(goodsScoreTitleLbl)
-        let goodsScoreView = GoodsScoreView(frame: CGRect(x: 108, y: CGRectGetMaxY(headViewBg.frame)+22, width: 32*5, height: 26)){(str) ->Void in
+        let goodsScoreView = GoodsScoreView(frame: CGRect(x: 108, y: CGRectGetMaxY(headViewBg.frame)+22, width: 32*5, height: 26)){(str, point) ->Void in
             self.goodsScoreRigthLbl.text = str as String
         }
         self.view.addSubview(goodsScoreView)
@@ -87,7 +87,7 @@ class OrderGoodsScoreViewController: UIViewController,UITextFieldDelegate,UIActi
         // 物流评分
         let logisticsitleLbl = ZMDTool.getLabel(CGRect(x: 12, y: CGRectGetMaxY(goodsScoreTitleLbl.frame)+32, width: 96, height: 17), text: "物流服务 :", fontSize: 17)
         self.view.addSubview(logisticsitleLbl)
-        let logisticsScoreView = GoodsScoreView(frame: CGRect(x: 108, y: CGRectGetMaxY(goodsScoreTitleLbl.frame)+22, width: 32*5, height: 26)){(str) ->Void in
+        let logisticsScoreView = GoodsScoreView(frame: CGRect(x: 108, y: CGRectGetMaxY(goodsScoreTitleLbl.frame)+22, width: 32*5, height: 26)){(str, point) ->Void in
             self.logisticsScoreRigthLbl.text = str as String
         }
         self.view.addSubview(logisticsScoreView)

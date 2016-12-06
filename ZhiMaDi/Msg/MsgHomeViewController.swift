@@ -49,12 +49,16 @@ class MsgHomeViewController: UIViewController,UITableViewDataSource, UITableView
         }
         
         func didSelect(navViewController:UINavigationController){
-//            navViewController.pushViewController(pushViewController, animated: true)
+            navViewController.pushViewController(pushViewController, animated: true)
         }
     }
     var currentTableView: UITableView!
     var msgCellTypes = [MsgHomeCellType.Activity,.Order,.Goods,.Chat,.System]
 
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(true)
+        self.tabBarController!.tabBar.hidden = true
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         // 让导航栏支持右滑返回功能
@@ -101,14 +105,22 @@ class MsgHomeViewController: UIViewController,UITableViewDataSource, UITableView
         let cellType = self.msgCellTypes[indexPath.row]
         cell?.imageView?.image = cellType.data.msgImg
         cell?.textLabel?.text = cellType.data.title
-//        if cellType == .Activity {
-//            cell?.contentView.setBadgeValue("3", center: CGPoint(x: CGRectGetMaxX(cell!.textLabel!.frame)+25, y: 27.5))
-//        }
+        if cellType == .Activity {
+//            cell?.contentView.setBadgeValue("3", center: CGPoint(x:140, y: 27.5))
+        }
         return cell!
     }
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let cellType = self.msgCellTypes[indexPath.row]
-        cellType.didSelect(self.navigationController!)
+//        cellType.didSelect(self.navigationController!)
+        let vc = UIViewController()
+        vc.configBackButton()
+        vc.title = cellType.data.title
+        let label = ZMDTool.getLabel(CGRect(x: 0, y: kScreenHeight/3, width: kScreenWidth, height: 20), text: "暂时没有消息额,先去逛一逛吧!", fontSize: 17, textColor: defaultTextColor, textAlignment: NSTextAlignment.Center)
+        label.backgroundColor = UIColor.clearColor()
+        vc.view.addSubview(label)
+        vc.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     //MARK: -  PrivateMethod
     private func subViewInit(){
@@ -119,5 +131,6 @@ class MsgHomeViewController: UIViewController,UITableViewDataSource, UITableView
         self.currentTableView.dataSource = self
         self.currentTableView.delegate = self
         self.view.addSubview(self.currentTableView)
+
     }
 }

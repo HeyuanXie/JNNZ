@@ -35,6 +35,10 @@ let defaultDetailTextSize = defaultSysFontWithSize(15)
 /// 默认的分割线颜色
 let defaultLineColor = UIColor(red: 229/255, green: 229/255, blue: 229/255, alpha: 1.0)
 
+
+//灰色不可按button背景色
+let grayButtonBackgroundColor = UIColor(red: 216/255, green: 216/255, blue: 216/255, alpha: 1)
+
 /// 默认灰色
 let defaultGrayColor = UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1.0)
 
@@ -86,6 +90,7 @@ extension ZMDTool {
         cell.contentView.backgroundColor = tableViewCellDefaultBackgroundColor
         cell.detailTextLabel?.font = tableViewCellDefaultDetailTextFont
         cell.detailTextLabel?.textColor = tableViewCellDefaultDetailTextColor
+        cell.selectionStyle = .None
     }
     /// 对UIView对象进行配置(cornerRadius)
     class func configViewLayer(view: UIView) {

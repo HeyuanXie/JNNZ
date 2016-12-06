@@ -8,12 +8,14 @@
 
 import Foundation
 import Alamofire
-
 /// 服务器地址
 private let kServerAddress = { () -> String in
 //  "http://od.ccw.cn"
 //    "http://10.0.0.10"
-    "http://xw.ccw.cn"  // 伟
+//    "http://www.hulubao.com"
+//    "http://jn.zhimadi.cn"
+//    "http://www.ksnongte.com"
+    "http://jn.zhimadi.cn"
 }()
 private let kOdataAddress = { () -> String in
     kServerAddress + "/odata/v1"
@@ -75,6 +77,7 @@ private extension QNNetworkTool {
         request.addValue("Accept-Charset", forHTTPHeaderField: "UTF-8")
         request.addValue(publicKey, forHTTPHeaderField: "SmartStore-Net-Api-PublicKey")
         request.addValue(timestamp, forHTTPHeaderField: "SmartStore-Net-Api-Date")
+
         return request
     }
     
@@ -91,10 +94,10 @@ private extension QNNetworkTool {
      :param: parameters        请求的参数
      :param: completionHandler 请求完成后的回掉
      */
-    private class func requestPOST(urlString: String, parameters: [String : AnyObject]?, completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?,  dictionary: NSDictionary?, error: NSError?) -> Void) {
+    private class func requestPOST(urlString: String, parameters: [String : AnyObject]?, code:String = "URL", completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?,  dictionary: NSDictionary?, error: NSError?) -> Void) {
         let url: NSURL! = NSURL(string: urlString)
         assert((url != nil), "输入的url有问题")
-        requestForSelf(url, method: "POST", parameters: parameters, completionHandler: completionHandler)
+        requestForSelf(url, method: "POST", parameters: parameters, code: code, completionHandler: completionHandler)
     }
     /**
      Get请求通用简化版
@@ -113,8 +116,8 @@ private extension QNNetworkTool {
      */
     private class func paramsToJsonDataParams(params: [String : AnyObject]) -> [String : AnyObject] {
         do {
-//            let jsonData = try NSJSONSerialization.dataWithJSONObject(params, options: NSJSONWritingOptions())
-//            let jsonDataString = NSString(data: jsonData, encoding: NSUTF8StringEncoding) as! String
+            let jsonData = try NSJSONSerialization.dataWithJSONObject(params, options: NSJSONWritingOptions())
+            let jsonDataString = NSString(data: jsonData, encoding: NSUTF8StringEncoding) as! String
             return  params
         } catch {
         }
@@ -129,8 +132,39 @@ private extension QNNetworkTool {
      :param: parameters        请求的参数
      :param: completionHandler 请求完成后的回掉， 如果 dictionary 为nil，那么 error 就不可能为空
      */
-    private class func requestForSelf(url: NSURL?, method: String, parameters: [String : AnyObject]?, completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?, dictionary: NSDictionary?, error: NSError?) -> Void) {
+    /*private class func requestForSelfWithJSON(url: NSURL?, method: String, parameters: [String : AnyObject]?, completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?, dictionary: NSDictionary?, error: NSError?) -> Void) {
         request(ParameterEncoding.URL.encode(self.productRequest(url, method: method), parameters: parameters).0).response{
+            if $3 != nil {  // 直接出错了
+                completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: $3); return
+            }
+            do {
+                let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData($2! as NSData, options: NSJSONReadingOptions.MutableContainers)
+                let dictionary = jsonObject as? NSDictionary
+                if dictionary == nil {  // Json解析结果出错
+                    guard let _ = jsonObject as? NSArray else {
+                        completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "JSON解析错误", code: 10086, userInfo: nil));
+                        return
+                    }
+                    completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "返回的为array", code: 10086, userInfo: nil));
+                }
+                completionHandler(request: $0!, response: $1, data: $2, dictionary: dictionary, error: nil)
+            }
+            catch {
+                completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "JSON解析错误", code: 10086, userInfo: nil));
+                println("Json解析过程出错")
+            }
+        }
+    }*/
+    
+    private class func requestForSelf(url: NSURL?, method: String, parameters: [String : AnyObject]?,code:String = "URL", completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?, dictionary: NSDictionary?, error: NSError?) -> Void) {
+        var mutableRequest : NSMutableURLRequest!
+        switch code {
+            case "JSON":
+            mutableRequest = ParameterEncoding.JSON.encode(self.productRequest(url, method: method), parameters: parameters).0
+        default :
+            mutableRequest = ParameterEncoding.URL.encode(self.productRequest(url, method: method), parameters: parameters).0
+        }
+        request(mutableRequest).response{
             if $3 != nil {  // 直接出错了
                 completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: $3); return
             }
@@ -153,6 +187,7 @@ private extension QNNetworkTool {
         }
     }
 }
+
 // MARK: - 网络基础处理(上传)
 extension QNNetworkTool {
     
@@ -197,7 +232,107 @@ extension QNNetworkTool {
         request.HTTPBody = bodyData
         return request
     }
+    
+    
+    //生产多参数上传Request
+    private class func uploadRequestWithParams(url: NSURL!, method: NSString, data: NSData, fileName: NSString,params: NSDictionary) -> NSURLRequest {
+        
+        let request = self.productRequest(url, method: method)
+        request.addValue("image/jpeg", forHTTPHeaderField: "ContentType")
+        // 定制一post方式上传数据，数据格式必须和下面方式相同
+        let boundary = "abcdefg"
+        var str1 = NSMutableString()
+        for key in params.allKeys {
+            let key = key as! String
+            let value = params.valueForKey(key) as! Int
+            request.setValue(String(format: "multipart/form-data;boundary=%@", boundary), forHTTPHeaderField: "Content-Type")
+            str1 = NSMutableString(format: "--%@\r\nContent-Disposition: form-data; name=\"%@\"\r\n\r\n%d\r\n",boundary, key,value)
+        }
+
+        let str = NSMutableString(format: "%@--%@\r\nContent-Disposition: form-data; name=\"%@\";filename=\"%@\"\r\nContent-Type: %@\r\nContent-Transfer-Encoding: binary\r\n\r\n",str1,boundary, "file", fileName, "image/jpeg")  //  application/octet-stream
+        // 配置内容
+        let bodyData = str.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) as! NSMutableData
+        bodyData.appendData(data)
+        bodyData.appendData("\r\n".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+        bodyData.appendData(NSString(format: "--%@--\r\n",boundary).dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+        request.HTTPBody = bodyData
+        return request
+    }
 }
+
+
+//MARK:- 多张图片上传
+extension QNNetworkTool {
+    class func uploadMultiImages(params:[String:AnyObject], data: [NSData], name: [String], completion:(success:Bool?,error:ErrorType?,dictionary:NSDictionary?) -> Void) {
+        let request = self.productRequest(NSURL(string: kServerAddress+"/api/v1/extend/order/UploadReviewImage"), method: "POST")
+        request.addValue("multipart/form-data", forHTTPHeaderField: "content-type")
+        Alamofire.upload(request, multipartFormData: { (multipartFormData) -> Void in
+            //参数的上传
+            let productReviewId = params["productReviewId"]
+            let displayOrder = params["displayOrder"]
+            multipartFormData.appendBodyPart(data: (productReviewId?.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false))!, name: "productReviewId")
+            multipartFormData.appendBodyPart(data: (displayOrder?.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false))!, name: "displayOrder")
+            //multipartFormData.append(<#T##data: Data##Data#>, withName: <#T##String#>, fileName: <#T##String#>, mimeType: <#T##String#>)  ---使用的方法
+            //遍历图片，挨个添加，withName-name和后台确定是什么
+            for i in 0..<data.count {
+                multipartFormData.appendBodyPart(data: data[i], name: "face", fileName: name[i], mimeType: "image/jpeg")
+            }
+            }) { (encodingResult) -> Void in
+                switch encodingResult {
+                case .Success(let upload, _, _):
+                    upload.responseJSON { response in
+                        if let value = response.result.value as? [String: AnyObject]{
+                            completion(success: true, error: nil,dictionary: value)
+                        }
+                    }
+                case .Failure(let encodingError):
+                    completion(success: false, error: encodingError,dictionary: nil)
+                }
+        }
+    }
+}
+
+//MARK:- 检测更新相关
+extension QNNetworkTool {
+    class func checkUpdate(completion: (error:NSError?,dictionary:NSDictionary?) -> Void) {
+        requestPOST(APP_URL_DETAIL, parameters: nil) { (request, response, data, dictionary, error) in
+            if let dic = dictionary {
+                completion(error: nil, dictionary: dic)
+            }else{
+                completion(error: error, dictionary: nil)
+            }
+        }
+    }
+}
+
+//MARK:- 用户中心
+extension QNNetworkTool {
+    /**
+     修改头像
+     
+     - parameter file:       文件
+     - parameter fileName:   文件名字
+     - parameter customerId: customerId description
+     - parameter completion: completion description
+     */
+    class func uploadCustomerHead(file: NSData, fileName: NSString,customerId: NSString, completion: (succeed : Bool,dic:NSDictionary?, error:NSError?) -> Void) {
+        let url = NSURL(string: kServerAddress+"/api/v1/uploads/CustomerAvtar")
+        //        request(ParameterEncoding.URL.encode(self.uploadRequest(url, method: "POST", data: file, fileName: "file",customerId:g_customerId!), parameters: nil).0).response{
+        request(self.uploadRequest(url, method: "POST", data: file, fileName: fileName,customerId:g_customerId!)).response{
+            do {
+                let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData($2!, options: NSJSONReadingOptions.MutableContainers)
+                guard let data = jsonObject as? NSArray,dic = data[0] as? NSDictionary,url = dic["ImageUrl"] as? String else {
+                    completion(succeed: false, dic: nil, error: $3)
+                    return
+                }
+                g_customer?.Avatar?.AvatarUrl = url
+                completion(succeed: true, dic: dic, error: $3)
+            } catch {}
+        }
+    }
+    
+}
+
 //MARK:- 登陆相关
 extension QNNetworkTool {
     // 验证手机验证码
@@ -214,11 +349,11 @@ extension QNNetworkTool {
             }
         }
     }
-    
     // 手机发送验证码
     class func sendCode(phone:String,completion: (success: Bool!,error:NSError?,dictionary:NSDictionary?) -> Void){
         requestPOST(kServerAddress + "/api/v1/extend/Login/SendCode", parameters: paramsToJsonDataParams(["mobile" : phone])) { (_,response, _, dictionary, error) -> Void in
-            guard let dic = dictionary , let succeed = dic["Success"] as? NSNumber else {
+//            guard let dic = dictionary , let succeed = dic["Success"] as? NSNumber else {
+            guard let dic = dictionary , let succeed = dic["success"] as? NSNumber else {
                 completion(success:false,error: error,dictionary:nil)
                 return
             }
@@ -257,6 +392,7 @@ extension QNNetworkTool {
                 g_customer = customer
                 if let url = g_customer?.Avatar?.AvatarUrl  {
                     g_customer?.Avatar?.AvatarUrl = kImageAddressMain + url
+                    g_customer?.FirstName = Username
                 }
             }
             completion(success:true,error: nil,dictionary:nil)
@@ -264,13 +400,15 @@ extension QNNetworkTool {
     }
     // 手机验证码登录
     class func loginWithPhoneCode(mobile:String,code:String,completion: (success: Bool!,error:NSError?,dictionary:NSDictionary?) -> Void){
-        requestPOST(kServerAddress + "/api/v1/extend/Login/PhoneLogin", parameters: paramsToJsonDataParams(["mobile" : mobile,"code" : code])) { (_,response, _, dictionary, error) -> Void in
-            guard let dic = dictionary,success = dic["success"] as? Bool where success else {
+        requestPOST(kServerAddress + "/api/v1/extend/Login/PhoneLogin", parameters: (["mobile" : mobile,"code" : code])) { (_,response, _, dictionary, error) -> Void in
+            guard let dic = dictionary else {
                 completion(success:false,error: error,dictionary:nil)
                 return
             }
             if let customerId = dic["customerId"] as? Int {
                 g_customerId = customerId
+            } else {
+                completion(success:false,error: error,dictionary:nil)
             }
             if let customerDic = dic["customer"] as? NSDictionary,customer = ZMDCustomer.mj_objectWithKeyValues(customerDic) {
                 g_customer = customer
@@ -283,7 +421,7 @@ extension QNNetworkTool {
     }
     // 修改密码
     class func changePassword(mobile:String,code:String,psw:String,completion: (success: Bool!,error:NSError?,dictionary:NSDictionary?) -> Void){
-        requestPOST(kServerAddress + "/api/v1/extend/Login/ChangePassword", parameters: paramsToJsonDataParams(["mobile" : mobile,"code" : code,"psw":psw])) { (_,response, _, dictionary, error) -> Void in
+        requestPOST(kServerAddress + "/api/v1/extend/Login/ChangePassword", parameters: (["mobile" : mobile,"code" : code,"psw":psw])) { (_,response, _, dictionary, error) -> Void in
             guard let dic = dictionary , succeed = dic["success"] as? Bool where succeed else {
                 completion(success:false,error: error,dictionary:nil)
                 return
@@ -293,33 +431,72 @@ extension QNNetworkTool {
         }
     }
 }
-//MARK:- 用户中心
-extension QNNetworkTool {
-    /**
-     修改头像
-     
-     - parameter file:       文件
-     - parameter fileName:   文件名字
-     - parameter customerId: customerId description
-     - parameter completion: completion description
-     */
-    class func uploadCustomerHead(file: NSData, fileName: NSString,customerId: NSString, completion: (succeed : Bool,dic:NSDictionary?, error:NSError?) -> Void) {
-        let url = NSURL(string: kServerAddress+"/api/v1/uploads/CustomerAvtar")
-//        request(ParameterEncoding.URL.encode(self.uploadRequest(url, method: "POST", data: file, fileName: "file",customerId:g_customerId!), parameters: nil).0).response{
-        request(self.uploadRequest(url, method: "POST", data: file, fileName: fileName,customerId:g_customerId!)).response{
-            do {
-                let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData($2!, options: NSJSONReadingOptions.MutableContainers)
-                guard let data = jsonObject as? NSArray,dic = data[0] as? NSDictionary,url = dic["ImageUrl"] as? String else {
-                    completion(succeed: false, dic: nil, error: $3)
-                    return
-                }
-                g_customer?.Avatar?.AvatarUrl = url
-                completion(succeed: true, dic: dic, error: $3)
-            } catch {}
+
+//MARK: 葫芦宝首页相关数据
+extension QNNetworkTool  {
+    class func fetchMainPageInto(completion: (advertisementAll: ZMDAdvertisementAll?,error:NSError?,dictionary:NSDictionary?) -> Void){
+        //http://xw.ccw.cn/api/v1/extend/Advertisement/IndexAds/
+        //        kServerAddress + "/api/v1/extend/Advertisement/IndexAds"
+        requestPOST(kServerAddress + "/api/v1/extend/Advertisement/IndexAds", parameters: nil) { (_,response, _, dictionary, error) -> Void in
+            guard let dic = dictionary ,let advertisementAll = ZMDAdvertisementAll.mj_objectWithKeyValues(dic) else {
+                completion(advertisementAll:nil,error: error,dictionary:nil)
+                return
+            }
+            completion(advertisementAll:advertisementAll,error: nil,dictionary:dictionary)
         }
     }
-
+    
 }
+
+
+//MARK: 疆南农资首页相关数据
+extension QNNetworkTool {
+    ///首页类别
+    class func fetchMainCategories(completion:(categories:NSArray?,error:NSError?)-> Void) {
+        requestGET(kServerAddress+"/api/v1/extend/product/HomepageCategories", parameters: nil) { (request, response, data, dictionary, error) -> Void in
+            if data != nil {
+                do {
+                    let jsonObject : AnyObject? = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
+                    guard let array = jsonObject as? NSArray else {
+                        completion(categories: nil, error: error)
+                        return
+                    }
+                    let categories = ZMDXHYCategory.mj_objectArrayWithKeyValuesArray(array)
+                    completion(categories: categories, error: nil)
+                }catch{
+                    println("JSON解析失败")
+                }
+            }else{
+                completion(categories: nil, error: error)
+            }
+        }
+    }
+    
+    ///首页类别对应产品获取
+    class func fetchProductsInCategory(pageSize:Int,categoryId:Int,completion:(products:NSArray?,WidgetName:String?,error:NSError?) -> Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/product/CatalogHomepageProducts", parameters: ["customerId":g_customerId ?? 1,"pageSize":pageSize,"catalogId":categoryId]) { (request, response, data, dictionary, error) -> Void in
+            guard let dic = dictionary, products = ZMDProduct.mj_objectArrayWithKeyValuesArray(dic["Products"]), WidgetName = dic["WidgetName"] as? String else {
+                completion(products: nil, WidgetName: nil, error: error)
+                return
+            }
+            completion(products: products, WidgetName: WidgetName, error: nil)
+        }
+    }
+    
+    ///首页类别对应小广告(图文产品)获取
+    class func fetchAdInCategory(widgetName:String,completion:(advertisements:NSArray?,error:NSError?) -> Void) {
+        requestGET(kServerAddress+"/api/v1/Advertisement/\(widgetName)", parameters: nil) { (request, response, data, dictionary, error) -> Void in
+            guard let dic = dictionary,advertisements = ZMDAdvertisement.mj_objectArrayWithKeyValuesArray(dic["zones"]) else {
+                completion(advertisements: nil, error: error)
+                return
+            }
+            completion(advertisements: advertisements, error: nil)
+        }
+    }
+    
+}
+
+
 //MARK:- 产品相关
 extension QNNetworkTool {
     /**
@@ -350,6 +527,22 @@ extension QNNetworkTool {
         }
     }
     
+    /**
+     商品列表(可通过Cid（类目Id）查询)
+     
+     */
+    class func products(As:String,pageSize:Int,pageNumber:Int,storeId:Int,Q:String,orderBy:Int,isNew:String,Cid:Int,completion:(products:NSArray?,error:NSError?,dic:NSDictionary?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/StoreExtend/StoreIndex", parameters: ["PageSize":pageSize,"PageNumber":pageNumber,"StoreId":storeId,"As":As,"Q":Q,"OrderBy":orderBy,"IsNew":isNew,"Cid":Cid]) { (request, response, data, dictionary, error) -> Void in
+            if dictionary != nil {
+                let productData = dictionary!["Products"]
+                let products = ZMDProduct.mj_objectArrayWithKeyValuesArray(productData)
+                completion(products: products, error: nil, dic: dictionary)
+            }else{
+                completion(products: nil, error: error, dic: dictionary)
+            }
+        }
+    }
+    
     class func products(skip:Int,order : String?,isAsc : Bool? = true,completion: (products : NSArray?,error:NSError?,dictionary:NSDictionary?) -> Void) {
         let ascTmp = (isAsc == nil || isAsc!) ? "desc" : "asc"
         let urlTmp = order == nil ? "/Products?$top=20&$skip=\(skip*20)"  : "/Products?&$orderby=\(order!)+\(ascTmp)&$top=20&$skip=\(skip*20)"
@@ -368,11 +561,29 @@ extension QNNetworkTool {
         //        "/Categories?$top=10"
         requestGET(kOdataAddress + "/Categories?$top=6", parameters: nil) { (_, _, _, dictionary, error) -> Void in
             if dictionary != nil{
-                let value = dictionary!["value"]
-                let categories = ZMDCategory.mj_objectArrayWithKeyValuesArray(value)
+                let values = dictionary!["value"]
+                let categories = ZMDCategory.mj_objectArrayWithKeyValuesArray(values)
                 completion(categories:categories,error: nil,dictionary:dictionary)
             }else {
                 completion(categories:nil,error: error,dictionary:nil)
+            }
+        }
+    }
+    
+    class func sortCategories(completion:(category:NSArray?,error:NSError?,dicitonary:NSDictionary?)->Void) {
+        requestGET(kServerAddress+"/api/v1/extend/Product/HomepageCategories", parameters: nil) { (request, response, data, dictionary, error) -> Void in
+            if data != nil {
+                do {
+                    let jsonObject:AnyObject = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
+                    guard let array = jsonObject as? NSArray else{
+                        completion(category: nil, error: error, dicitonary: dictionary)
+                        return
+                    }
+                    let categorys = ZMDXHYCategory.mj_objectArrayWithKeyValuesArray(array)
+                    completion(category: categorys, error: nil, dicitonary: dictionary)
+                } catch {
+                    println("JSON解析过程出错")
+                }
             }
         }
     }
@@ -385,14 +596,15 @@ extension QNNetworkTool {
     class func fetchProductDetail(Id:Int,completion: (productDetail: ZMDProductDetail?,error:NSError?,dictionary:NSDictionary?) -> Void){
         
         requestPOST(kServerAddress + "/api/v1/extend/Product/ProductDetails", parameters: ["Id":Id,"customerId":g_customerId ?? 0]) { (_,response, _, dictionary, error) -> Void in
-            guard let dic = dictionary ,let productDetail = ZMDProductDetail.mj_objectWithKeyValues(dic["produc"]) else {
+            guard let dic = dictionary ,let productDetail = ZMDProductDetail.mj_objectWithKeyValues(dic["product"]) else {
                 completion(productDetail:nil,error: error,dictionary:nil)
                 return
             }
             completion(productDetail:productDetail,error: nil,dictionary:dictionary)
         }
     }
-    // 产品详情信息 html
+    //MARK:-产品详情信息View(WebView)
+    // 产品详情信息 html(WebView)
     class func fetchProductDetailView(productId:Int,completion: (succeed : Bool!,data:String?,error: NSError?) -> Void){
         let url = NSURL(string: kServerAddress + "/product/ProductDetailview?productId=\(productId)")
         request(ParameterEncoding.URL.encode(self.productRequest(url, method: "POST"), parameters: nil).0).responseString { (response) -> Void in
@@ -403,23 +615,70 @@ extension QNNetworkTool {
             completion(succeed:true,data: data, error: nil)
         }
     }
-    //MARK: 首页数据
-    class func fetchMainPageInto(completion: (advertisementAll: ZMDAdvertisementAll?,error:NSError?,dictionary:NSDictionary?) -> Void){
-        requestPOST(kServerAddress + "/api/v1/extend/Advertisement/IndexAds", parameters: nil) { (_,response, _, dictionary, error) -> Void in
-            guard let dic = dictionary ,let advertisementAll = ZMDAdvertisementAll.mj_objectWithKeyValues(dic) else {
-                completion(advertisementAll:nil,error: error,dictionary:nil)
+}
+
+
+//MARK: 店铺相关
+extension QNNetworkTool {
+    ///搜索店铺、店铺列表
+    class func fetchStoreList(pageSize: Int!,pageNumber: Int!,orderBy:Int?,Q:String?,completion: (storeArray:NSArray?,error:NSError?,dictionary:NSDictionary?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/StoreExtend/StoreSearch", parameters: ["PageSize":pageSize,"PageNumber":pageNumber]) { (_, response, _, dictionary, error) -> Void in
+            guard let dic = dictionary,let storeArray = ZMDStoreDetail.mj_objectArrayWithKeyValuesArray(dic["Stores"]) else{
+                completion(storeArray: nil, error: error, dictionary: dictionary)
                 return
             }
-            completion(advertisementAll:advertisementAll,error: nil,dictionary:dictionary)
+            completion(storeArray: storeArray as NSArray, error: nil, dictionary: dictionary)
+        }
+        
+    }
+    
+    /**
+     搜索店铺商品、请求店铺首页数据（新品推荐）
+     
+     */
+    class func fetchStoreHomePages(pageSize:Int,pageNumber:Int,StoreId:Int,orderBy:Int,Q:String,isNew:Bool,completion: (store:ZMDStoreDetail?,products:NSArray?,categories:NSArray?,error:NSError?,dictionary:NSDictionary?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/StoreExtend/StoreIndex", parameters: ["PageSize":pageSize,"PageNumber":pageNumber,"StoreId":StoreId,"OrderBy":orderBy,"Q":Q,"IsNew":isNew]) { (_, _, _, dictionary, error) -> Void in
+            guard let dic = dictionary,let products = ZMDProduct.mj_objectArrayWithKeyValuesArray(dic["Products"]),store = ZMDStoreDetail.mj_objectWithKeyValues(dic["Store"]),categories = ZMDStoreCategory.mj_objectArrayWithKeyValuesArray(dic["AvailableCategories"]) else {
+                completion(store: nil, products: nil, categories: nil, error: error, dictionary: dictionary)
+                return
+            }
+            completion(store: store, products: products, categories: categories, error: nil, dictionary: dictionary)
+        }
+    }
+    
+    
+    //收藏/取消收藏 店铺（collect==true为收藏）
+    class func collectStores(storeId:Int!,collect:Bool!,completion:(succeed:Bool?,error:NSError?,dictionary:NSDictionary?)->Void) {
+        requestPOST(kServerAddress+"收藏店铺", parameters: ["StoreId":storeId]) { (request, response, data, dictionary, error) -> Void in
+            guard let success = dictionary!["success"] as? NSNumber where success.boolValue else {
+                completion(succeed: false, error: error, dictionary: dictionary)
+                return
+            }
+            completion(succeed: true, error: nil, dictionary: dictionary)
+        }
+    }
+    
+    //单店订单合计
+    class func singleStoreTotal(customerId:Int!,storeId:Int!,Completion:(total:ZMDSingleStoreTotal?,error:NSError?,dictionary:NSDictionary?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/ShoppingCart/OrderTotals", parameters: ["customerId":customerId,"storeId":storeId]) { (_, _, _, dictionary, error) -> Void in
+            
+            guard let success = dictionary!["success"] as? NSNumber where success.boolValue else {
+                Completion(total: nil, error: error, dictionary: dictionary)
+                return
+            }
+            let total = ZMDSingleStoreTotal.mj_objectWithKeyValues(dictionary!["Total"])
+            Completion(total: total, error: error, dictionary: dictionary)
         }
     }
 }
+
+
 //MARK:- 订单相关
 extension QNNetworkTool {
     /**
      下订单
      
-     - parameter ItemIds:    订单id
+     - parameter ItemIds:       选中的商品的id链接成的字符串(作为订单id)
      - parameter completion: completion description
      */
     class func selectCart(ItemIds: String,completion: (succeed : Bool!,dictionary:NSDictionary?,error: NSError?) -> Void) {
@@ -446,6 +705,45 @@ extension QNNetworkTool {
             completion(succeed:true,dictionary: dictionary, error: nil)
         }
     }
+    
+    /*
+    代收网点列表
+    para:json字段
+    */
+    class func fetchDaiShouAddress(/*customreId:Int,*/completion:(address:NSArray?,error:NSError?,data:NSData?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/Outlets/List", parameters: ["customerId":g_customerId!]) { (request, response, data, dictionary, error) -> Void in
+            if data != nil{
+                do {
+                    let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
+                    guard let array = jsonObject as? NSArray else {
+                        completion(address: nil, error: error, data: nil)
+                        return
+                    }
+                    let address = ZMDDSAddress.mj_objectArrayWithKeyValuesArray(array)
+                    completion(address: address, error: nil, data: nil)
+                } catch {
+                    println("Json解析过程出错")
+                }
+            }else {
+                completion(address: nil, error: error, data: nil)
+            }
+        }
+    }
+    
+    //选择代收网点
+    class func selectDaiShouAddress(outLetId:Int,completion:(success:Bool?,error:NSError?,dictionary:NSDictionary?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/Outlets/ChangeShipping", parameters: ["outletId":outLetId,"customerId":g_customerId!]) { (request, response, data, dictionary, error) -> Void in
+            if dictionary != nil {
+                let success = dictionary!["success"] as! Bool
+                if success == true {
+                    completion(success: true, error: nil, dictionary: dictionary)
+                }else{
+                    completion(success: false, error: error, dictionary: dictionary)
+                }
+            }
+        }
+    }
+    
     // 获取发票信息
     class func fetchPublicInfo(completion: (publicInfo : ZMDPublicInfo?,dictionary:NSDictionary?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/Invoices/PublicInfo", parameters: nil) { (_, _, _, dictionary, error) -> Void in
@@ -456,7 +754,7 @@ extension QNNetworkTool {
             completion(publicInfo:publicInfo,dictionary: dictionary, error: nil)
         }
     }
-    // 用户优惠券
+    // 用户优惠券（我的 -> 卡券)
     class func fetchCustomerCoupons(completion: (coupons : NSArray?,datas:NSData?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/CustomerCoupons/Coupons", parameters: ["customerId":1]) { (_, _, data, _, error) -> Void in
             do {
@@ -486,7 +784,7 @@ extension QNNetworkTool {
             completion(succeed:true,dictionary: dictionary, error: nil)
         }
     }
-    // 结算的可用优惠券列表
+    // 结算时的可用优惠券列表
     class func fetchCustomerCouponsForOrder(completion: (coupons : NSArray?,dictionary:NSDictionary?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/CustomerCoupons/PublicInfo", parameters: ["customerId":g_customerId!]) { (_, _, data, dictionary, error) -> Void in
             do {
@@ -516,21 +814,46 @@ extension QNNetworkTool {
             completion(succeed:true,dictionary: dictionary, error: nil)
         }
     }
+    
+    //MARK: 获取各种状态订单及订单数目
+    class func getOrderNumbers(orderStatusId:Int,orderNo:String,pageIndex:Int,pageSize:Int,completion: (dic :NSDictionary?,Error: NSError?) ->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/order/OrderSearch", parameters: ["customerId":g_customerId!,"pageIndex":pageIndex,"pageSize":pageSize,"OrderStatusId":orderStatusId,"orderNo":orderNo]) { (request, response, data, dictionary, error) -> Void in
+            if dictionary != nil {
+                completion(dic: dictionary, Error: nil)
+            }else{
+                completion(dic: nil, Error: error)
+            }
+        }
+    }
+
     // MARK: - 获取当前要结算订单的合计
     /**
     获取当前要结算订单的合计
     
     - parameter completion:      completion
     */
-    class func getOrderTotals(completion: (OrderTotal : AnyObject?,dictionary:NSDictionary?,error: NSError?) -> Void) {
+    class func getOrderTotals(completion: (OrderTotal : ZMDOrderTotal?,dictionary:NSDictionary?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/Checkout/OrderTotals", parameters: ["CustomerId":g_customerId!]) { (_, _, _, dictionary, error) -> Void in
-            guard let orderTotal = dictionary?["OrderTotal"]  else {
+            guard let dic = dictionary else {
                 completion(OrderTotal:nil,dictionary: dictionary, error: error)
                 return
             }
-            completion(OrderTotal:orderTotal,dictionary: dictionary, error: nil)
+            let total = ZMDOrderTotal.mj_objectWithKeyValues(dic)
+            completion(OrderTotal:total,dictionary: dictionary, error: nil)
         }
     }
+    
+    // MARK:重新付款获取支付方式
+    class func fetchRePaymentMethod(orderId:Int,completion: (paymentMethods : NSArray!,dictionary:NSDictionary?,error:NSError?)->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/Checkout/RePaymentMethod", parameters: ["orderId":orderId,"customerId":g_customerId!]) { (request, response, data, dictionary, error) -> Void in
+            guard let paymentMethods = dictionary?["PaymentMethods"] as? NSArray ,payMethods = ZMDPaymentMethod.mj_objectArrayWithKeyValuesArray(paymentMethods) else {
+                completion(paymentMethods: nil, dictionary: dictionary, error: error)
+                return
+            }
+            completion(paymentMethods: payMethods, dictionary: dictionary, error: nil)
+        }
+    }
+
     // 获取支付方式列表
     class func fetchPaymentMethod(completion: (paymentMethods : NSArray!,dictionary:NSDictionary?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/Checkout/PaymentMethod", parameters: ["CustomerId":g_customerId!]) { (_, _, _, dictionary, error) -> Void in
@@ -541,11 +864,27 @@ extension QNNetworkTool {
                 completion(paymentMethods:payMethods,dictionary: dictionary, error: nil)
         }
     }
+    
+    //MARK: -订单列表相关
+    ///获取各种状态订单及订单数目
+    class func fetchOrder(orderStatusId:Int,orderNo:String,pageIndex:Int,pageSize:Int,completion: (orders: NSArray?,dic :NSDictionary?,Error: NSError?) ->Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/order/OrderSearch", parameters: ["customerId":g_customerId!,"pageIndex":pageIndex,"pageSize":pageSize,"OrderStatusId":orderStatusId,"orderNo":orderNo]) { (request, response, data, dictionary, error) -> Void in
+            if let dic = dictionary,orders = dic["Orders"] {
+                let ordersArray = ZMDOrderDetail2.mj_objectArrayWithKeyValuesArray(orders as! [AnyObject])
+                completion(orders: ordersArray, dic: dic, Error: nil)
+            }else{
+                completion(orders: nil, dic: nil, Error: error)
+            }
+        }
+    }
+
     /**
      确认订单
      
      - parameter CustomerComment: 备注
      - parameter completion:      completion description
+     - parameter Paymentmethod:     PaymentMethodSystemName
+     http://www.hulubao.com/api/v1/extend/Checkout/PaymentMethod
      */
     class func confirmOrder(CustomerComment: String,Paymentmethod:String,completion: (succeed : Bool!,dictionary:NSDictionary?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/Checkout/ConfirmOrder", parameters: ["CustomerComment" : CustomerComment,"CustomerId":g_customerId!,"Paymentmethod":Paymentmethod]) { (_, _, _, dictionary, error) -> Void in
@@ -562,6 +901,11 @@ extension QNNetworkTool {
     }
     
     // 获取订单
+    /*
+    PaymentStatusId :付款状态
+    OrderStatusId: 订单状态
+    ShippingStatusId: 发货状态
+    */
     class func fetchOrder(urlStr:String,completion: ( value: NSArray?,error: NSError?) -> Void) {
         var str = (kOdataAddress + urlStr).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
         let url = NSURL(string:str)
@@ -615,9 +959,9 @@ extension QNNetworkTool {
             completion(succeed:true,dictionary: dictionary, error: nil)
         }
     }
-    // 重新支付
+    // 重新支付(重新完成未完成的订单，不会另外生成新的订单)
     class func rePostPayment(orderid: Int,Paymentmethod:String,completion: (succeed : Bool!,dictionary:NSDictionary?,error: NSError?) -> Void) {
-        requestPOST(kServerAddress + "/api/v1/extend/Checkout/RePostPayment", parameters: ["customerId": g_customer!,"orderid" : orderid,"Paymentmethod":Paymentmethod]) { (_, _, _, dictionary, error) -> Void in
+        requestPOST(kServerAddress + "/api/v1/extend/Checkout/RePostPayment", parameters: ["customerId": g_customerId!,"orderid" : orderid,"Paymentmethod":Paymentmethod]) { (_, _, _, dictionary, error) -> Void in
             guard let success = dictionary?["success"] as? NSNumber where success.boolValue else {
                 completion(succeed:false,dictionary: dictionary, error: error)
                 return
@@ -626,11 +970,99 @@ extension QNNetworkTool {
         }
     }
 }
+
+//MARK: - 订单评价
+extension QNNetworkTool {
+    ///获取订单评价晒单列表
+    class func fetchCommentsList(orderId:Int,completion:(success:Bool?,error:String?,reviews:NSArray?) -> Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/order/Reviews", parameters: ["customerId":g_customerId!,"orderId":orderId]) { (request, response, data, dictionary, error) -> Void in
+            guard let success = dictionary?["success"] as? Bool,reviews = dictionary?["reviews"] as? NSArray where success.boolValue else {
+                completion(success: false, error: dictionary!["error"] as? String, reviews: nil)
+                return
+            }
+            let reviewsArr = ZMDProductComment.mj_objectArrayWithKeyValuesArray(reviews)
+            completion(success: true, error: nil, reviews: reviewsArr)
+        }
+    }
+    
+    ///添加评价(得到ZMDProductCommentModel.Id用于上传图片)
+    class func addComments(params:NSDictionary,completion:(success:Bool?,error:String?,productReviews:NSArray?) -> Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/order/ReviewsAdd", parameters: params as? [String : AnyObject], code: "JSON") { (request, response, data, dictionary, error) -> Void in
+            if let dic = dictionary,success = dic["success"] as? Bool where success.boolValue {
+                let commentItems = ZMDCommentItem.mj_objectArrayWithKeyValuesArray(dic["productReviews"])
+                completion(success: true, error: nil, productReviews: commentItems)
+            }else{
+                completion(success: false, error: nil, productReviews: nil)
+            }
+        }
+    }
+    
+    ///晒图
+    /*
+    file : 图片二进制文件
+    fileName : 图片名称
+    params : 同时post的参数
+    
+    completion(返回数据):
+    [
+    {"ImageUrl": "",
+    "ThumbImageUrl": "",
+    "FullSizeImageUrl": ""
+    }
+    ]
+    */
+    class func uploadCommentPicture(file: NSData, fileName: NSString,params: NSDictionary, completion: (succeed : Bool,error:NSError?) -> Void) {
+        let url = NSURL(string: kServerAddress+"/api/v1/extend/order/UploadReviewImage")
+        request(self.uploadRequestWithParams(url, method: "POST", data: file, fileName: fileName, params: params)).response{
+            do {
+                let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData($2!, options: NSJSONReadingOptions.MutableContainers)
+                guard let data = jsonObject as? NSArray where data.count != 0 else {
+                    completion(succeed: false, error: $3)
+                    return
+                }
+                completion(succeed: true, error: $3)
+            } catch {
+                
+            }
+        }
+    }
+    
+    ///店铺评分
+    class func addStoreComments(description:Int,service:Int,logistics:Int,orderId:Int,customerId:Int,completion:(success:Bool?,error:String?) -> Void) {
+        requestPOST(kServerAddress+"/api/v1/extend/StoreExtend/AddStoreScore", parameters: ["description":description,"service":service,"logistics":logistics,"orderId":orderId,"csutomerId":g_customerId!]) { (request, response, data, dictionary, error) -> Void in
+            if let dic = dictionary,success = dic["success"] as? Bool where success == true {
+                completion(success: true, error: nil)
+            }else{
+                completion(success: false, error: nil)
+                if let dic = dictionary, errorMsg = dic["error"] as? String {
+                    ZMDTool.showErrorPromptView(dic, error: nil, errorMsg: errorMsg)
+                }
+            }
+        }
+    }
+}
+
 //MARK:- 购物车相关
 extension QNNetworkTool {
     /**
+     获取购物车商品数量
+     */
+    class func fetchShoppingCartNumber(completion:(number:Int?,dic:NSDictionary?,error:NSError?)->Void) {
+        if g_isLogin! {
+            requestPOST(kServerAddress+"/api/v1/extend/Checkout/OrderTotals", parameters: ["customerId":g_customerId!], completionHandler: { (request, response, data, dictionary, error) -> Void in
+                guard let dic = dictionary, number = dic["TotalQuantity"] as? Int else {
+                    completion(number: nil, dic: nil, error: error)
+                    return
+                }
+                completion(number: number, dic: dic, error: nil)
+            })
+        }
+    }
+
+    /**
      添加购物车
      */
+    // 不管carttype == 1 还是 == 2，在收藏的同时都会加入到购物车
     class func addProductToCart(formData: NSDictionary,completion: (succeed : Bool!,dictionary:NSDictionary?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/Product/AddProductToCart", parameters: formData as! [String : AnyObject]) { (_, _, _, dictionary, error) -> Void in
             guard let success = dictionary?["success"] as? NSNumber where success.boolValue else {
@@ -660,13 +1092,19 @@ extension QNNetworkTool {
      
      - parameter completion: 完成回调
      */
+     
+    //*****************未登录时，查看购物车跳转到登陆页面
     class func fetchShoppingCart(carttype:Int,completion: (shoppingItems : NSArray?,dictionary:NSDictionary?,error: NSError?) -> Void) {
-        requestPOST(kServerAddress + "/api/v1/extend/ShoppingCart/Cart", parameters: ["customerId":g_customerId!,"carttype":carttype]) { (_, _, _, dictionary, error) -> Void in
-            guard let Items = dictionary?["Items"],let shoppingItems = ZMDShoppingItem.mj_objectArrayWithKeyValuesArray(Items) else {
-                completion(shoppingItems:nil,dictionary: dictionary, error: error)
-                return
+        if g_isLogin! {
+            requestPOST(kServerAddress + "/api/v1/extend/ShoppingCart/Cart", parameters: ["customerId":g_customerId!,"cartType":carttype]) { (_, _, _, dictionary, error) -> Void in
+                guard let Items = dictionary?["Items"],let shoppingItems = ZMDShoppingItem.mj_objectArrayWithKeyValuesArray(Items) else {
+                    completion(shoppingItems:nil,dictionary: dictionary, error: error)
+                    return
+                }
+                completion(shoppingItems:shoppingItems,dictionary: dictionary, error: nil)
             }
-            completion(shoppingItems:shoppingItems,dictionary: dictionary, error: nil)
+        }else{
+            print("g_customerId为nil")
         }
     }
     /**
@@ -805,7 +1243,7 @@ extension QNNetworkTool {
             }
         }
     }
-    // add
+    // add & Edit
     class func addOrEditAddress(address : ZMDAddress,completion: (succeed : Bool!,dictionary:NSDictionary?,error: NSError?) -> Void) {
         var parms : [String : AnyObject]!
         if address.Id == nil {

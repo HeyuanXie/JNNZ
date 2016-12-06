@@ -32,6 +32,20 @@ let APP_URL_IN_ITUNES_PREFIX = "https://itunes.apple.com/cn/app/id%@?ls=1&mt=8"
 /// APP 下载地址（在iTunes中）
 let APP_URL_IN_ITUNES = String(format: APP_URL_IN_ITUNES_PREFIX, APP_ID)
 
+// MARK: - CheckUpdate
+/// APP 应用是否Launched
+var APP_HOMEPAGELAUNCHTIMES = 0
+/// APP 详细信息地址
+let APP_URL_DETAIL = "http://itunes.apple.com/cn/lookup?id=\(APP_ID)"
+
+// MARK: - XGPush
+/// 信鸽推送注册的设备Token
+var XG_DeviceToken : NSData?
+/// 信鸽推送AccessId
+let XG_AccessId = "2200241981"
+/// 信鸽推送AccessKey
+let XG_AccessKey = "IZ91M2D8T6GI"
+
 // MARK: - System
 /// 系统名称
 let SYSTEM_NAME: String = UIDevice.currentDevice().systemName
@@ -145,4 +159,13 @@ func compareVersion(version1: String, version2: String) -> NSComparisonResult? {
     
     func NSLog(format: String, args: CVarArgType...) {}
 #endif
+
+////自定义打印
+//func HYLog<T>(message : T, file : String = __FILE__, lineNumber : Int = __LINE__) {
+//    #if DEBUG
+//        let fileName = (file as NSString).lastPathComponent
+//        print("[\(fileName):line:\(lineNumber)]- \(message)")
+//        
+//    #endif
+//}
 

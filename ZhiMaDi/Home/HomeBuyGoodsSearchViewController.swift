@@ -9,21 +9,30 @@
 import UIKit
 import FMDB
 // 商品搜索
-class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol, UITableViewDataSource, UITableViewDelegate,UISearchBarDelegate {
+class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol, UITableViewDataSource, UITableViewDelegate,UISearchBarDelegate{
     
     @IBOutlet weak var currentTableView: UITableView!
-    let goodses  = ["睡袋","婴儿床","床垫","儿童椅","奶酪","七万"]
+    let goodses  = ["酒","核桃","服饰","水果"]
     var goodsHistory = NSMutableArray()
     let goodsData = ["",""]
+    var reccomdArray :NSMutableArray = NSMutableArray()
+    
+    enum TableViewType {
+        case WithNoGoods
+        case WithGoods
+    }
+    var tableViewType = TableViewType.WithNoGoods      //tableView的section结构
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.fetchData()
         self.dataInit()
         self.currentTableView.backgroundColor = tableViewdefaultBackgroundColor
         self.setupNewNavigation()
     }
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
-        self.currentTableView.reloadData()
+        //搜索跳转到另一个页面返回时，将搜索历史更新
+        self.dataInit()
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -31,21 +40,22 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
     }
     
     //MARK:- UITableViewDataSource,UITableViewDelegate
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return self.tableViewType == .WithNoGoods ? 2 : 4
+    }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 1 {
             return self.goodsHistory.count + 1
         } else if section == 3 {
+            //为你推荐
             return goodsData.count
         }
         return  1
     }
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 4
-    }
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         switch section {
-        case 1 :
-            return 10
+        case 0 :
+            return 0
         case 1 :
             return 10
         case 2 :
@@ -86,16 +96,17 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
         } else if indexPath.section == 2 {
             return  80
         } else if indexPath.section == 3 {
-            return  581/750 * kScreenWidth + 10
+            return  (kScreenWidth/2-12*2)*2 + 20
         }
         return 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         switch indexPath.section {
-        case 0 :
+        case 0 ://热搜
             let cellId = "goodsHotCell"
             var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+            //热搜sectioncell：一个“热搜”label 和 其他 气泡button
             if cell == nil {
                 cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellId)
                 cell?.accessoryType = UITableViewCellAccessoryType.None
@@ -119,9 +130,12 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
                     btn.layer.cornerRadius = 10
                     btn.layer.masksToBounds = true
                     btn.rac_signalForControlEvents(.TouchUpInside).subscribeNext({ (sender) -> Void in
+                        //得到btn上的标题，通过标题进入对应的HomeBuyListViewController更新UI
                         let goods = self.goodses[index]
                         // save
                         let homeBuyListViewController = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
+                        homeBuyListViewController.titleForFilter = goods
+                        homeBuyListViewController.hideSearch = true
                         self.navigationController?.pushViewController(homeBuyListViewController, animated: true)
                     })
                     return btn
@@ -150,7 +164,8 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
             
             return cell!
         case 1 :
-            //记录
+            //搜索历史
+            //indexPath.row == self.goodsHistory.count,即为最后一个cell：cleanCell
             if indexPath.row == self.goodsHistory.count {
                 let cellId = "cleanCell"
                 var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
@@ -176,10 +191,11 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
                 }
                 return cell!
             }
+            //其他的都是搜索历史Cell：historyCell
             let cellId = "historyCell"
             var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
             if cell == nil {
-                cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellId)
+                cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
                 cell?.accessoryType = UITableViewCellAccessoryType.None
                 cell!.selectionStyle = .None
                 
@@ -190,26 +206,30 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
                 btn.setImage(UIImage(named: "GoodsSearch_close"), forState: .Normal)
                 btn.tag = indexPath.row
                 btn.rac_signalForControlEvents(.TouchUpInside).subscribeNext({ (sender) -> Void in
-                    //delete
+                    //点击btn删除当前条搜索历史在dataBase中对应的数据
                     self.deleteValueFromDB(self.createOrOpenDB(),text:(self.goodsHistory[(sender as! UIButton).tag] as! String))
-                    self.currentTableView.reloadData()
+                    //删除数据后，更新搜索历史
+                    self.dataInit()
                 })
                 
-                let label = UILabel(frame: CGRectMake(14, 20,100, 16))
-                label.text = self.goodsHistory[indexPath.row] as? String
-                label.textColor = defaultDetailTextColor
-                label.font = UIFont.systemFontOfSize(16)
-                
+                //                let label = UILabel(frame: CGRectMake(14, 20,100, 16))
+                //                label.text = self.goodsHistory[indexPath.row] as? String
+                //                label.textColor = defaultDetailTextColor
+                //                label.font = UIFont.systemFontOfSize(16)
+                //
                 cell?.contentView.addSubview(btn)
-                cell?.contentView.addSubview(label)
+                //                cell?.contentView.addSubview(label)
                 
                 let line = UIImageView(frame: CGRect(x: 0, y: 54, width: kScreenWidth, height: 0.5))
                 line.backgroundColor = defaultLineColor
                 cell?.contentView.addSubview(line)
             }
+            cell?.textLabel?.text = self.goodsHistory[indexPath.row] as? String
+            cell?.textLabel?.textColor = defaultDetailTextColor
+            cell?.textLabel?.font = UIFont.systemFontOfSize(16)
             return cell!
         case 2 :
-            //
+            //为你推荐
             let cellId = "doubleHeadCell"
             var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
             if cell == nil {
@@ -224,23 +244,85 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
             //
             let cellId = "doubleGoodsCell"
             let cell = tableView.dequeueReusableCellWithIdentifier(cellId) as! DoubleGoodsTableViewCell
-            cell.goodsImgVLeft.image = UIImage(named: "home_banner02")
+            cell.selectionStyle = .None
+            
+            if self.reccomdArray.count != 0 {
+                let productL = self.reccomdArray[indexPath.row*2] as! ZMDProduct
+                let productR = self.reccomdArray[indexPath.row*2+1] as! ZMDProduct
+                cell.leftBtn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+                    let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
+                    vc.productId = productL.Id.integerValue
+                    vc.hidesBottomBarWhenPushed = true
+                    self.navigationController?.pushViewController(vc, animated: true)
+                    return RACSignal.empty()
+                })
+                cell.rightBtn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+                    let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
+                    vc.productId = productR.Id.integerValue
+                    vc.hidesBottomBarWhenPushed = true
+                    self.navigationController?.pushViewController(vc, animated: true)
+                    return RACSignal.empty()
+                })
+                DoubleGoodsTableViewCell.configCell(cell, product: productL , productR: productR)
+            }
             return cell
-   
+            
         default :
             return UITableViewCell()
         }
     }
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        switch indexPath.section {
+        case 0 : //热搜
+            return  //无操作
+        case 1 :
+            //点击"清除搜索记录"cell，删除所有记录
+            if indexPath.row == self.goodsHistory.count {
+                let dataBase = self.createOrOpenDB()
+                dataBase.executeUpdate("DELETE FROM GoodsHistory", withArgumentsInArray: nil)
+                self.dataInit()
+            }else{
+                //点击其他cell，将cell.label.text返回给searchBar.text
+                let text = self.goodsHistory[indexPath.row] as! String
+                let searchView = self.navigationItem.titleView
+                let searchBar = searchView?.subviews.first as! UISearchBar
+                searchBar.text = text
+                let homeBuyListViewController = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
+                homeBuyListViewController.hideSearch = true
+                homeBuyListViewController.titleForFilter = text
+                self.navigationController?.pushViewController(homeBuyListViewController, animated: true)
+            }
+            return
+        case 2 :
+            return  //无操作
+        case 3 :
+            //进入商品详情页
+            return
+        default:
+            break
+        }
         
     }
+    
     //MARK: - UISearchBarDelegate
+    func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
+        let bgBtn = UIButton(frame: self.view.bounds)
+        bgBtn.tag = 100
+        self.presentPopupView(bgBtn, config: .None)
+        bgBtn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+            bgBtn.removeFromSuperview()
+            (self.navigationItem.titleView?.viewWithTag(10000) as! UISearchBar).resignFirstResponder()
+            return RACSignal.empty()
+        })
+    }
     func searchBarSearchButtonClicked(searchBar: UISearchBar)  {
         self.view.endEditing(true)
+        self.view.viewWithTag(100)?.removeFromSuperview()
         insertValueToDB(createOrOpenDB(),text: searchBar.text!)
         let homeBuyListViewController = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
         homeBuyListViewController.titleForFilter = searchBar.text ?? ""
-        self.navigationController?.pushViewController(homeBuyListViewController, animated: true)
+        homeBuyListViewController.hideSearch = true
+        self.navigationController?.pushViewController(homeBuyListViewController, animated: false)
     }
     //MARK: -  PrivateMethod
     func setupNewNavigation() {
@@ -253,9 +335,10 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
         searchBar.layer.cornerRadius = 6
         searchBar.layer.masksToBounds = true
         searchBar.delegate = self
+        searchBar.tag = 10000
         searchView.addSubview(searchBar)
         self.navigationItem.titleView = searchView
-
+        
         let rightItem = UIBarButtonItem(title: "取消", style: UIBarButtonItemStyle.Done, target: nil, action: nil)
         rightItem.rac_command = RACCommand(signalBlock: { (input) -> RACSignal! in
             self.navigationController?.popViewControllerAnimated(true)
@@ -263,6 +346,21 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
         })
         self.navigationItem.rightBarButtonItem = rightItem
     }
+    
+    //获取 为你推荐 部分商品内容
+    func fetchData() {
+        QNNetworkTool.products("农产品", pagenumber: "\(3)", orderby: 0, Cid: "") { (products, error, dictionary) -> Void in
+            if let productArr = products {
+//                for var i=0;i<4;i++ {
+//                    self.reccomdArray = NSMutableArray(array: productArr)
+//                }
+                self.reccomdArray = NSMutableArray(array: productArr)
+            }
+            self.tableViewType = self.reccomdArray.count == 0 ? TableViewType.WithNoGoods : .WithGoods
+            self.currentTableView.reloadData()
+        }
+    }
+    
     func dataInit() {
         self.queryValueToDB(self.createOrOpenDB())
     }
@@ -296,13 +394,17 @@ class HomeBuyGoodsSearchViewController: UIViewController, ZMDInterceptorProtocol
     }
     func deleteValueFromDB(database:FMDatabase,text:String) {
         do {
-            try database.executeUpdate("delete from GoodsHistory where goodsTitle = \(text)",values:nil)
+            try database.executeUpdate("delete from GoodsHistory where (goodsTitle) = (?)",values: [text])
         } catch let error as NSError {
             print("failed: \(error.localizedDescription)")
         }
         database.close()
-        self.currentTableView.reloadSections(NSIndexSet(index: 1), withRowAnimation: UITableViewRowAnimation.Bottom)
+        //删除后刷新section和table都没用，因为这两个方法都不会从改变后的dataBase中更新UI，只有datainit()方法可以
+        //        self.currentTableView.reloadSections(NSIndexSet(index: 1), withRowAnimation: UITableViewRowAnimation.Bottom)
+        //        self.currentTableView.reloadData()
     }
+    
+    //从dataBase中请求数据
     func queryValueToDB(database:FMDatabase) {
         do {
             let rs = try database.executeQuery("select goodsTitle from GoodsHistory", values: nil)

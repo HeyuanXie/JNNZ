@@ -201,12 +201,17 @@ class CardVolumeHomeViewController: UIViewController,UITableViewDataSource, UITa
     //MARK: -  PrivateMethod
     func updateUI() {
         self.title = "卡券"
-        let lbl = ZMDTool.getLabel(CGRect(x: 0, y: 0, width: 95, height: 44), text: "已过期卡券", fontSize: 16)
-        let item = UIBarButtonItem(customView: lbl)
-        item.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
-            
+        let rightItem = UIButton(frame: CGRectMake(0, 0, 60, 44))
+        rightItem.backgroundColor = UIColor.clearColor()
+        rightItem.setTitle("已过期卡券", forState: .Normal)
+        rightItem.titleLabel?.font = UIFont.systemFontOfSize(12)
+        rightItem.setTitleColor(defaultDetailTextColor, forState: .Normal)
+        rightItem.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+            ZMDTool.showPromptView("功能尚未开放")
             return RACSignal.empty()
         })
+        let item = UIBarButtonItem(customView: rightItem)
+
         item.customView?.tintColor = defaultDetailTextColor
         self.navigationItem.rightBarButtonItem = item
         
