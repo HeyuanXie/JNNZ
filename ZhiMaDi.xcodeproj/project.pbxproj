@@ -811,6 +811,13 @@
 		84AB984A1DE2D987003E8253 /* cb_glossy_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 84AB98461DE2D987003E8253 /* cb_glossy_on.png */; };
 		84AB984B1DE2D987003E8253 /* cb_glossy_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84AB98471DE2D987003E8253 /* cb_glossy_on@2x.png */; };
 		84B3A97A1D9D0EFF00B49354 /* ZMDStoreDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B3A9791D9D0EFF00B49354 /* ZMDStoreDetail.swift */; };
+		84B85F801DF68D8500DF79D1 /* OrderCommentViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B85F7F1DF68D8500DF79D1 /* OrderCommentViewController2.swift */; };
+		84B85F861DF6ACFB00DF79D1 /* PgySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84B85F841DF6ACFB00DF79D1 /* PgySDK.framework */; };
+		84B85F871DF6ACFB00DF79D1 /* PgyUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84B85F851DF6ACFB00DF79D1 /* PgyUpdate.framework */; };
+		84B85F891DF6AD7000DF79D1 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84B85F881DF6AD7000DF79D1 /* AudioToolbox.framework */; };
+		84B85F8B1DF6AD7900DF79D1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84B85F8A1DF6AD7900DF79D1 /* AVFoundation.framework */; };
+		84B85F8D1DF6AD8200DF79D1 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84B85F8C1DF6AD8200DF79D1 /* OpenGLES.framework */; };
+		84B85F8F1DF6AD8A00DF79D1 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84B85F8E1DF6AD8A00DF79D1 /* CoreMotion.framework */; };
 		84C645CA1DED5C4700EE9D7B /* UILabelExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C645C91DED5C4700EE9D7B /* UILabelExtension.swift */; };
 		84C75F851D911D7000C7CA12 /* MyWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C75F841D911D7000C7CA12 /* MyWebViewController.swift */; };
 		84C75F871D913C0A00C7CA12 /* sorry.png in Resources */ = {isa = PBXBuildFile; fileRef = 84C75F861D913C0A00C7CA12 /* sorry.png */; };
@@ -1701,6 +1708,13 @@
 		84AB98461DE2D987003E8253 /* cb_glossy_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cb_glossy_on.png; sourceTree = "<group>"; };
 		84AB98471DE2D987003E8253 /* cb_glossy_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cb_glossy_on@2x.png"; sourceTree = "<group>"; };
 		84B3A9791D9D0EFF00B49354 /* ZMDStoreDetail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZMDStoreDetail.swift; sourceTree = "<group>"; };
+		84B85F7F1DF68D8500DF79D1 /* OrderCommentViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderCommentViewController2.swift; sourceTree = "<group>"; };
+		84B85F841DF6ACFB00DF79D1 /* PgySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = PgySDK.framework; sourceTree = "<group>"; };
+		84B85F851DF6ACFB00DF79D1 /* PgyUpdate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = PgyUpdate.framework; sourceTree = "<group>"; };
+		84B85F881DF6AD7000DF79D1 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		84B85F8A1DF6AD7900DF79D1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		84B85F8C1DF6AD8200DF79D1 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		84B85F8E1DF6AD8A00DF79D1 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		84C645C91DED5C4700EE9D7B /* UILabelExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UILabelExtension.swift; sourceTree = "<group>"; };
 		84C75F841D911D7000C7CA12 /* MyWebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyWebViewController.swift; sourceTree = "<group>"; };
 		84C75F861D913C0A00C7CA12 /* sorry.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sorry.png; sourceTree = "<group>"; };
@@ -1737,9 +1751,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B3AC5DB1C96BF1E00CC8662 /* libz.tbd in Frameworks */,
-				2B539ABD1C99511C00FFE6CD /* CoreTelephony.framework in Frameworks */,
+				84B85F8F1DF6AD8A00DF79D1 /* CoreMotion.framework in Frameworks */,
+				84B85F8D1DF6AD8200DF79D1 /* OpenGLES.framework in Frameworks */,
+				84B85F8B1DF6AD7900DF79D1 /* AVFoundation.framework in Frameworks */,
+				84B85F891DF6AD7000DF79D1 /* AudioToolbox.framework in Frameworks */,
 				2B539ABF1C99512C00FFE6CD /* SystemConfiguration.framework in Frameworks */,
+				2B539ABD1C99511C00FFE6CD /* CoreTelephony.framework in Frameworks */,
+				2B3AC5DB1C96BF1E00CC8662 /* libz.tbd in Frameworks */,
+				84B85F871DF6ACFB00DF79D1 /* PgyUpdate.framework in Frameworks */,
 				2B539AB91C9950EC00FFE6CD /* CFNetwork.framework in Frameworks */,
 				2B5FF4211CA4E11F0067909D /* CoreText.framework in Frameworks */,
 				2B539AC71C99518900FFE6CD /* Security.framework in Frameworks */,
@@ -1747,6 +1766,7 @@
 				2B539AC51C99514200FFE6CD /* UIKit.framework in Frameworks */,
 				2BA222FE1CE96E00006BC426 /* libcrypto.a in Frameworks */,
 				2B539AC31C99513A00FFE6CD /* Foundation.framework in Frameworks */,
+				84B85F861DF6ACFB00DF79D1 /* PgySDK.framework in Frameworks */,
 				2B539AC11C99513300FFE6CD /* CoreGraphics.framework in Frameworks */,
 				2BA222FD1CE96E00006BC426 /* AlipaySDK.framework in Frameworks */,
 				2B539ABB1C9950F400FFE6CD /* CoreFoundation.framework in Frameworks */,
@@ -1776,6 +1796,10 @@
 		18E2BC74B095F0976F695BAA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84B85F8E1DF6AD8A00DF79D1 /* CoreMotion.framework */,
+				84B85F8C1DF6AD8200DF79D1 /* OpenGLES.framework */,
+				84B85F8A1DF6AD7900DF79D1 /* AVFoundation.framework */,
+				84B85F881DF6AD7000DF79D1 /* AudioToolbox.framework */,
 				2B5FF4201CA4E11F0067909D /* CoreText.framework */,
 				2B539AC61C99518900FFE6CD /* Security.framework */,
 				2B539AC41C99514200FFE6CD /* UIKit.framework */,
@@ -1881,6 +1905,7 @@
 				2BC0EA991D052877004BF176 /* DiscountCardViewController.swift */,
 				2B8BB2B81CBE30F600CD2AD5 /* OrderGoodsScoreViewController.swift */,
 				84AB97F61DE29FAC003E8253 /* OrderCommentViewController.swift */,
+				84B85F7F1DF68D8500DF79D1 /* OrderCommentViewController2.swift */,
 				2B02B54E1CAD21E70064B47C /* CashierViewController.swift */,
 				2B02B5501CAD2CCD0064B47C /* OrderPaySucceedViewController.swift */,
 				84DC65391D6EE326000DECC5 /* TradeSuccessedViewController.swift */,
@@ -3086,6 +3111,7 @@
 		3C90987A1C76A6E9006B7D2C /* Librarys */ = {
 			isa = PBXGroup;
 			children = (
+				84B85F831DF6ACFB00DF79D1 /* pgySDK */,
 				84AB98231DE2A71B003E8253 /* TZImagePickerController */,
 				8446E60B1DD5A1C800889E9A /* XGPush */,
 				2BA223001CE9B169006BC426 /* MJExtension */,
@@ -3506,6 +3532,15 @@
 			);
 			name = TZImagePickerController;
 			path = XGPush/TZImagePickerController;
+			sourceTree = "<group>";
+		};
+		84B85F831DF6ACFB00DF79D1 /* pgySDK */ = {
+			isa = PBXGroup;
+			children = (
+				84B85F841DF6ACFB00DF79D1 /* PgySDK.framework */,
+				84B85F851DF6ACFB00DF79D1 /* PgyUpdate.framework */,
+			);
+			path = pgySDK;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -4346,6 +4381,7 @@
 				3C90994C1C76A6E9006B7D2C /* ChartYAxisRendererRadarChart.swift in Sources */,
 				3C90995D1C76A6E9006B7D2C /* NSString+AES.m in Sources */,
 				2B73D8551C86B6D00016FEB2 /* InputTextViewController.swift in Sources */,
+				84B85F801DF68D8500DF79D1 /* OrderCommentViewController2.swift in Sources */,
 				2B5BBC141CD30ADD00D2AC9F /* MyStoreCustomerViewController.swift in Sources */,
 				2B539C051C9AACD000FFE6CD /* StartImageView.swift in Sources */,
 				3C9098711C76A6AA006B7D2C /* QNStyleAttribute.swift in Sources */,
@@ -4586,8 +4622,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: The Wholesale Of Agricultural Commodities Of Jiangnan Kashi Bulk Agricultural Prod (JQV37Q32C9)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: The Wholesale Of Agricultural Commodities Of Jiangnan Kashi Bulk Agricultural Prod (JQV37Q32C9)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -4633,6 +4669,7 @@
 					"$(PROJECT_DIR)/ZhiMaDi/Librarys/ShareSDK",
 					3/Support/Required,
 					"$(PROJECT_DIR)/ZhiMaDi/Librarys/AlipaySDK",
+					"$(PROJECT_DIR)/ZhiMaDi/Librarys/pgySDK",
 				);
 				INFOPLIST_FILE = ZhiMaDi/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -4687,8 +4724,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: The Wholesale Of Agricultural Commodities Of Jiangnan Kashi Bulk Agricultural Prod (JQV37Q32C9)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: The Wholesale Of Agricultural Commodities Of Jiangnan Kashi Bulk Agricultural Prod (JQV37Q32C9)";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4705,6 +4742,7 @@
 					"$(PROJECT_DIR)/ZhiMaDi/Librarys/ShareSDK",
 					3/Support/Required,
 					"$(PROJECT_DIR)/ZhiMaDi/Librarys/AlipaySDK",
+					"$(PROJECT_DIR)/ZhiMaDi/Librarys/pgySDK",
 				);
 				INFOPLIST_FILE = ZhiMaDi/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;

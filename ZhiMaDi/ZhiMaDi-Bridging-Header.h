@@ -54,9 +54,11 @@
 
 #import <CommonCrypto/CommonHMAC.h>
 #import <AlipaySDK/AlipaySDK.h>
-
+//信鸽推送
 #import "XGPush.h"
-
+//图片选择器
 #import "TZImagePickerController.h"
-
+//蒲公英SDK
+#import <PgySDK/PgyManager.h>
+#import <PgyUpdate/PgyUpdateManager.h>
 #endif /* SleepCare_Bridging_Header_h */

@@ -77,6 +77,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
     var shoppingItemId: NSNumber!
     var isSecondTableView = false   //当前是否为第二个tableView
     
+    //MARK: - **************LifeCircle**************
     override func viewDidLoad() {
         super.viewDidLoad()
         self.updateUI()
@@ -214,6 +215,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
 //            return cellForScoreTableView(tableView, indexPath: indexPath)
             let tmpCell = UITableViewCell(style: .Default, reuseIdentifier: "tmpCell")
             tmpCell.textLabel?.text = "这是第一次检讨此商品"
+            tmpCell.textLabel?.textColor = defaultTextColor
             return tmpCell
         }
         
@@ -306,58 +308,8 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             break
         }
     }
-    //MARK: - scrollView
-    func scrollViewDidScroll(scrollView: UIScrollView) {
-        if scrollView != self.currentTableView {
-            return
-        }
-        var alaph = (scrollView.contentOffset.y) / 150.0
-        alaph = alaph > 1 ? 1 : alaph
-        if alaph > 0.5 {
-            self.setupNavigation()
-        }else{
-            self.setupNavigationWithBg()
-        }
-        if self.navBackView != nil && self.navLine != nil {
-            if alaph == 0 {
-                self.navLine.hidden = true
-            } else {
-                self.navLine.alpha = alaph
-                self.navLine.hidden = false
-            }
-            self.navBackView.alpha = alaph
-        }
-    }
     
-    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        if let cell = self.currentTableView.visibleCells.last {
-            if cell.reuseIdentifier == "loadMoreCell" {
-                self.currentTableView.mj_footer.hidden = false
-            } else {
-                self.currentTableView.mj_footer.hidden = true
-            }
-        }
-    }
-    
-    //MARK: QNShareViewDelegate
-    //分享的body，返回一个data，通过data.image可以取到image
-    func qnShareView(view: ShareView) -> (image: UIImage, url: String, title: String?, description: String)? {
-        if let productDetail = self.productDetail {
-            let imgUrl = kImageAddressMain + (productDetail.DetailsPictureModel?.DefaultPictureModel!.ImageUrl)!
-            let image = UIImage(data: NSData(contentsOfURL: NSURL(string: imgUrl)!)!)
-            let title = productDetail.Name
-            let url = "\(kImageAddressMain)/\(productDetail.Id.integerValue)"
-            let description = productDetail.description
-            return (image!,url,title,description)
-        }else{
-            return (UIImage(named: "Share_Icon")!, kImageAddressMain, self.title ?? "", "疆南市场,物美价廉!")
-        }
-    }
-    
-    func present(alert: UIAlertController) -> Void {
-        self.presentViewController(alert, animated: false, completion: nil)
-    }
-    //MARK: -  PrivateMethod
+    //MARK: - *****************TableViewCell*******************
     //MARK: Second cell
     func cellImageTextForSecond(tableView:UITableView,indexPath:NSIndexPath)-> UITableViewCell {
         let cellId = "SecondImageTextCell"
@@ -693,7 +645,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
     }
     //MARK:第二个table的menu
     func createFilterMenu() -> UIView{
-        let titles = ["图文详情","评分","相关推荐"]
+        let titles = ["图文详情","评分","商品参数"]
         var btnArr = NSMutableArray()
         let view = UIView(frame: CGRectMake(0 , 0, kScreenWidth, 60))
         for var i=0;i<titles.count;i++ {
@@ -705,7 +657,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             btn.backgroundColor = UIColor.clearColor()
             btn.setTitle(titles[i], forState: .Normal)
             btn.setTitle(titles[i], forState: .Normal)
-            btn.setTitleColor(UIColor.blackColor(), forState: .Normal)
+            btn.setTitleColor(defaultTextColor, forState: .Normal)
             btn.setTitleColor(defaultSelectColor, forState: .Selected)
             btn.titleLabel?.font = UIFont.systemFontOfSize(17)
             btn.tag = 1000 + i
@@ -734,38 +686,9 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         }
         return view
     }
-    //MARK:第二个table的navigation
-    func setupNavigation() {
-        let item = UIBarButtonItem(image: UIImage(named: "Navigation_Back")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
-        item.customView?.tintColor = UIColor.whiteColor()
-        self.navigationItem.leftBarButtonItem = item
-        let rightItem: UIBarButtonItem
-        if self.isCollected {
-            //收藏状态下的rightItem
-            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_04")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
-        }else{
-            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_03")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
-        }
-        rightItem.customView?.tintColor = UIColor.whiteColor()
-        self.navigationItem.rightBarButtonItem = rightItem
-    }
     
-    //MARK:第一个table的navigation
-    func setupNavigationWithBg() {
-        let item = UIBarButtonItem(image: UIImage(named: "product_return")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
-        item.customView?.tintColor = UIColor.whiteColor()
-        self.navigationItem.leftBarButtonItem = item
-        
-        let rightItem: UIBarButtonItem
-        if self.isCollected {
-            //收藏状态下的rightItem
-            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_02")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
-        }else{
-            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_01")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
-        }
-        rightItem.customView?.tintColor = UIColor.whiteColor()
-        self.navigationItem.rightBarButtonItem = rightItem
-    }
+    //MARK: - ****************PrivateMethod****************
+    //MARK:dataInit
     private func dataInit(){
         self.goodsCellTypes = [.HomeContentTypeAd,.HomeContentTypeDetail,.HomeContentTypeMenu,.HomeContentTypeDistribution,/*.HomeContentTypeStore,.HomeContentTypeDaPeiGou*/.HomeContentTypeLoadMore]
         
@@ -792,57 +715,6 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             }
         }
     }
-    //在第一个table上拉刷新
-    func footerRefresh(){
-        UIView.animateWithDuration(0.38, animations: { () -> Void in
-            var frame = self.currentTableView.frame
-            //第一个table顶部是超出了64的，所以secondTable要+64
-            frame.origin = CGPoint(x: 0, y: frame.origin.y + 64)
-            frame.size = CGSizeMake(kScreenWidth, kScreenHeight - 64 - 58)
-            self.secondTableView.frame = frame
-            frame.origin = CGPoint(x: 0, y: frame.origin.y - frame.size.height - 64)
-            self.currentTableView.frame = frame
-            }, completion: { (bool) -> Void in
-                self.currentTableView.mj_footer.endRefreshing()
-                self.setupNavigation()
-                if self.navBackView != nil && self.navLine != nil {
-                    self.navLine.hidden = false
-                    self.navBackView.backgroundColor = UIColor.whiteColor()
-                    self.navBackView.alpha = 1.0
-                }
-                let btn = self.view.viewWithTag(10000)
-                self.view.bringSubviewToFront(btn!)
-        })
-        self.isSecondTableView = true
-    }
-    // 在第二个table下拉刷新
-    func headerRefresh(){
-        UIView.animateWithDuration(0.38, animations: { () -> Void in
-            var frame = self.secondTableView.frame
-            frame.origin = CGPoint(x: 0, y: frame.origin.y - 64)
-            frame.size = CGSizeMake(kScreenWidth, kScreenHeight - 64)
-            self.currentTableView.frame = CGRect(x: 0, y: -64, width: kScreenWidth, height: kScreenHeight-64)
-            self.currentTableView.contentOffset = CGPoint(x: 0, y: 0)
-            frame.origin = CGPoint(x: 0, y: 64 + frame.size.height)
-            self.secondTableView.frame = frame
-            }, completion: { (bool) -> Void in
-                self.secondTableView.mj_header.endRefreshing()
-                self.currentTableView.mj_footer.hidden = true
-        })
-        self.isSecondTableView = false
-    }
-    
-    //获取购物车数量
-    func getShoppingCartNumber() {
-        QNNetworkTool.fetchShoppingCartNumber { (number, dic, error) -> Void in
-            if let number = number {
-                self.countForShoppingCar.hidden = number == 0 ? true : false
-                self.countForShoppingCar.text = "\(number)"
-            }else{
-                self.countForShoppingCar.hidden = true
-            }
-        }
-    }
     
     func updateUI() {
         //设置购物车数量圆角
@@ -858,7 +730,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         self.currentTableView.backgroundColor  = tableViewdefaultBackgroundColor
         self.currentTableView.mj_footer = footer
         self.currentTableView.mj_footer.hidden = true
-       
+        
         self.bottomV.backgroundColor = RGB(247,247,247,1)
         
         secondTableView = UITableView(frame: CGRect(x: 0, y: CGRectGetMaxY(self.currentTableView.frame) + 100, width: kScreenWidth, height: self.currentTableView.frame.size.height))
@@ -903,7 +775,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
                         let shareView = ShareView()
                         shareView.delegate = strongSelf
                         shareView.showShareView()
-//                        ZMDShareSDKTool.shareWithMenu(shareView)
+                        //                        ZMDShareSDKTool.shareWithMenu(shareView)
                     }
                 } else if (sender as! UIButton).titleLabel?.text == titles[2] {
                     //MARK:加入购物车
@@ -961,7 +833,7 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
                         })
                     }
                 }
-            })
+                })
             self.bottomV.addSubview(bottomBtn)
             //暂时隐藏咨询和分享
             //isIn是Int的extension，判断int型的值是否在某个范围中
@@ -970,6 +842,22 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             }
             i++
         }
+    }
+    
+    //MARK:第二个table的navigation
+    func setupNavigation() {
+        let item = UIBarButtonItem(image: UIImage(named: "Navigation_Back")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
+        item.customView?.tintColor = UIColor.whiteColor()
+        self.navigationItem.leftBarButtonItem = item
+        let rightItem: UIBarButtonItem
+        if self.isCollected {
+            //收藏状态下的rightItem
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_04")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }else{
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_03")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }
+        rightItem.customView?.tintColor = UIColor.whiteColor()
+        self.navigationItem.rightBarButtonItem = rightItem
     }
     
     // MARK:配置navigationBar透明与否
@@ -993,6 +881,77 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             self.getBackView(view)
         }
     }
+    
+    //MARK:第一个table的navigation
+    func setupNavigationWithBg() {
+        let item = UIBarButtonItem(image: UIImage(named: "product_return")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
+        item.customView?.tintColor = UIColor.whiteColor()
+        self.navigationItem.leftBarButtonItem = item
+        
+        let rightItem: UIBarButtonItem
+        if self.isCollected {
+            //收藏状态下的rightItem
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_02")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }else{
+            rightItem = UIBarButtonItem(image: UIImage(named: "product_collect_01")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("collect"))
+        }
+        rightItem.customView?.tintColor = UIColor.whiteColor()
+        self.navigationItem.rightBarButtonItem = rightItem
+    }
+
+    //在第一个table上拉刷新
+    func footerRefresh(){
+        UIView.animateWithDuration(0.38, animations: { () -> Void in
+            var frame = self.currentTableView.frame
+            //第一个table顶部是超出了64的，所以secondTable要+64
+            frame.origin = CGPoint(x: 0, y: frame.origin.y + 64)
+            frame.size = CGSizeMake(kScreenWidth, kScreenHeight - 64 - 58)
+            self.secondTableView.frame = frame
+            frame.origin = CGPoint(x: 0, y: frame.origin.y - frame.size.height - 64)
+            self.currentTableView.frame = frame
+            }, completion: { (bool) -> Void in
+                self.currentTableView.mj_footer.endRefreshing()
+                self.setupNavigation()
+                if self.navBackView != nil && self.navLine != nil {
+                    self.navLine.hidden = false
+                    self.navBackView.backgroundColor = UIColor.whiteColor()
+                    self.navBackView.alpha = 1.0
+                }
+                let btn = self.view.viewWithTag(10000)
+                self.view.bringSubviewToFront(btn!)
+        })
+        self.isSecondTableView = true
+    }
+    // 在第二个table下拉刷新
+    func headerRefresh(){
+        UIView.animateWithDuration(0.38, animations: { () -> Void in
+            var frame = self.secondTableView.frame
+            frame.origin = CGPoint(x: 0, y: frame.origin.y - 64)
+            frame.size = CGSizeMake(kScreenWidth, kScreenHeight - 64)
+            self.currentTableView.frame = CGRect(x: 0, y: -64, width: kScreenWidth, height: kScreenHeight-64)
+            self.currentTableView.contentOffset = CGPoint(x: 0, y: 0)
+            frame.origin = CGPoint(x: 0, y: 64 + frame.size.height)
+            self.secondTableView.frame = frame
+            }, completion: { (bool) -> Void in
+                self.secondTableView.mj_header.endRefreshing()
+                self.currentTableView.mj_footer.hidden = true
+        })
+        self.isSecondTableView = false
+    }
+    
+    //获取购物车数量
+    func getShoppingCartNumber() {
+        QNNetworkTool.fetchShoppingCartNumber { (number, dic, error) -> Void in
+            if let number = number {
+                self.countForShoppingCar.hidden = number == 0 ? true : false
+                self.countForShoppingCar.text = "\(number)"
+            }else{
+                self.countForShoppingCar.hidden = true
+            }
+        }
+    }
+    
+
     
     //MARK:判断是否已经收藏
     func wheatherCollected() {
@@ -1022,11 +981,6 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
         } else {
             self.setupNavigation()
         }
-    }
-    
-    //MARK: 重写 -alertDestructiveAction
-    override func alertDestructiveAction() {
-        ZMDTool.enterLoginViewController()
     }
     
     //MARK:收藏和取消收藏
@@ -1074,8 +1028,71 @@ class HomeBuyGoodsDetailViewController: UIViewController,UITableViewDataSource,U
             self.commonAlertShow(true, title: "提示:未登录!", message: "是否立即登录?", preferredStyle: UIAlertControllerStyle.Alert)
         }
     }
+    
+    //MARK: - **************Delegate***************
+    //MARK:scrollViewDelegate
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if scrollView != self.currentTableView {
+            return
+        }
+        var alaph = (scrollView.contentOffset.y) / 150.0
+        alaph = alaph > 1 ? 1 : alaph
+        if alaph > 0.5 {
+            self.setupNavigation()
+        }else{
+            self.setupNavigationWithBg()
+        }
+        if self.navBackView != nil && self.navLine != nil {
+            if alaph == 0 {
+                self.navLine.hidden = true
+            } else {
+                self.navLine.alpha = alaph
+                self.navLine.hidden = false
+            }
+            self.navBackView.alpha = alaph
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        if let cell = self.currentTableView.visibleCells.last {
+            if cell.reuseIdentifier == "loadMoreCell" {
+                self.currentTableView.mj_footer.hidden = false
+            } else {
+                self.currentTableView.mj_footer.hidden = true
+            }
+        }
+    }
+    
+    //MARK: QNShareViewDelegate
+    //分享的body，返回一个data，通过data.image可以取到image
+    func qnShareView(view: ShareView) -> (image: UIImage, url: String, title: String?, description: String)? {
+        if let productDetail = self.productDetail {
+            let imgUrl = kImageAddressMain + (productDetail.DetailsPictureModel?.DefaultPictureModel!.ImageUrl)!
+            let image = UIImage(data: NSData(contentsOfURL: NSURL(string: imgUrl)!)!)
+            let title = productDetail.Name
+            let url = "\(kImageAddressMain)/\(productDetail.Id.integerValue)"
+            let description = productDetail.description
+            return (image!,url,title,description)
+        }else{
+            return (UIImage(named: "Share_Icon")!, kImageAddressMain, self.title ?? "", "疆南市场,物美价廉!")
+        }
+    }
+    
+    func present(alert: UIAlertController) -> Void {
+        self.presentViewController(alert, animated: false, completion: nil)
+    }
+    
+    
+    //MARK: - **************Override***************
+    //MARK: alertDestructiveAction
+    override func alertDestructiveAction() {
+        ZMDTool.enterLoginViewController()
+    }
+    
 }
 
+
+//MARK: - ***************OtherClass**************
 class ContentTypeDetailCell: UITableViewCell {
     @IBOutlet weak var nameLbl: UILabel!
     @IBOutlet weak var priceLbl: UILabel!

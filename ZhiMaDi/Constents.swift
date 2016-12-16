@@ -46,6 +46,15 @@ let XG_AccessId = "2200241981"
 /// 信鸽推送AccessKey
 let XG_AccessKey = "IZ91M2D8T6GI"
 
+//MARK: - 蒲公英
+/// 蒲公英AppId
+let PGY_APPID = "671908e1679c377b69faf1863daa0b1a"
+/// 蒲公英Api_key
+let PGY_API_KEY = "d2671ed4af0cc0bec7851d06377fddc8"
+/// 蒲公英Api_userKey
+let PGY_USER_KEY = "de7fc230e2861e6029f1baa0903923a9"
+
+
 // MARK: - System
 /// 系统名称
 let SYSTEM_NAME: String = UIDevice.currentDevice().systemName
@@ -63,6 +72,10 @@ let kScreenWidth = UIScreen.mainScreen().bounds.size.width
 let kScreenHeightZoom = kScreenHeight/568.0
 /// 屏幕宽度放大系数（相对于iPhone5/5S的屏幕）
 let kScreenWidthZoom = kScreenWidth/320.0
+/// 屏幕宽度放大系数 (相对于iPhone6/6s的屏幕)
+let kScreenWidthZoom6 = kScreenWidth/375.0
+/// 屏幕高度放大系数（相对于iPhone6/6S的屏幕）
+let kScreenHeightZoom6 = kScreenHeight/667.0
 
 // MARK: - NSUserDefaults.standardUserDefaults() 相关
 /// 从 NSUserDefaults.standardUserDefaults() 中获取数据

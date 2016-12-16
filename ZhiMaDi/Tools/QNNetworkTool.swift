@@ -15,7 +15,10 @@ private let kServerAddress = { () -> String in
 //    "http://www.hulubao.com"
 //    "http://jn.zhimadi.cn"
 //    "http://www.ksnongte.com"
-    "http://jn.zhimadi.cn"
+//    "http://www.ksnongzi.com"
+//    "http://www.ksnongpi.com"
+//    "http://jn1.zhimadi.cn"
+    "http://www.ksnongmao.com"
 }()
 private let kOdataAddress = { () -> String in
     kServerAddress + "/odata/v1"
@@ -94,10 +97,10 @@ private extension QNNetworkTool {
      :param: parameters        请求的参数
      :param: completionHandler 请求完成后的回掉
      */
-    private class func requestPOST(urlString: String, parameters: [String : AnyObject]?, code:String = "URL", completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?,  dictionary: NSDictionary?, error: NSError?) -> Void) {
+    private class func requestPOST(urlString: String, parameters: [String : AnyObject]?, completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?,  dictionary: NSDictionary?, error: NSError?) -> Void) {
         let url: NSURL! = NSURL(string: urlString)
         assert((url != nil), "输入的url有问题")
-        requestForSelf(url, method: "POST", parameters: parameters, code: code, completionHandler: completionHandler)
+        requestForSelf(url, method: "POST", parameters: parameters, completionHandler: completionHandler)
     }
     /**
      Get请求通用简化版
@@ -123,47 +126,9 @@ private extension QNNetworkTool {
         }
         return ["jsonData" : ""]
     }
-
-    /**
-     Request 请求通用简化版
-     
-     :param: url               请求的服务器地址
-     :param: method            请求的方式 Get/Post/Put/...
-     :param: parameters        请求的参数
-     :param: completionHandler 请求完成后的回掉， 如果 dictionary 为nil，那么 error 就不可能为空
-     */
-    /*private class func requestForSelfWithJSON(url: NSURL?, method: String, parameters: [String : AnyObject]?, completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?, dictionary: NSDictionary?, error: NSError?) -> Void) {
-        request(ParameterEncoding.URL.encode(self.productRequest(url, method: method), parameters: parameters).0).response{
-            if $3 != nil {  // 直接出错了
-                completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: $3); return
-            }
-            do {
-                let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData($2! as NSData, options: NSJSONReadingOptions.MutableContainers)
-                let dictionary = jsonObject as? NSDictionary
-                if dictionary == nil {  // Json解析结果出错
-                    guard let _ = jsonObject as? NSArray else {
-                        completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "JSON解析错误", code: 10086, userInfo: nil));
-                        return
-                    }
-                    completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "返回的为array", code: 10086, userInfo: nil));
-                }
-                completionHandler(request: $0!, response: $1, data: $2, dictionary: dictionary, error: nil)
-            }
-            catch {
-                completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "JSON解析错误", code: 10086, userInfo: nil));
-                println("Json解析过程出错")
-            }
-        }
-    }*/
     
-    private class func requestForSelf(url: NSURL?, method: String, parameters: [String : AnyObject]?,code:String = "URL", completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?, dictionary: NSDictionary?, error: NSError?) -> Void) {
-        var mutableRequest : NSMutableURLRequest!
-        switch code {
-            case "JSON":
-            mutableRequest = ParameterEncoding.JSON.encode(self.productRequest(url, method: method), parameters: parameters).0
-        default :
-            mutableRequest = ParameterEncoding.URL.encode(self.productRequest(url, method: method), parameters: parameters).0
-        }
+    private class func requestForSelf(url: NSURL?, method: String, parameters: [String : AnyObject]?, completionHandler: (request: NSURLRequest, response: NSHTTPURLResponse?, data: AnyObject?, dictionary: NSDictionary?, error: NSError?) -> Void) {
+        let mutableRequest = ParameterEncoding.JSON.encode(self.productRequest(url, method: method), parameters: parameters).0
         request(mutableRequest).response{
             if $3 != nil {  // 直接出错了
                 completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: $3); return
@@ -987,7 +952,7 @@ extension QNNetworkTool {
     
     ///添加评价(得到ZMDProductCommentModel.Id用于上传图片)
     class func addComments(params:NSDictionary,completion:(success:Bool?,error:String?,productReviews:NSArray?) -> Void) {
-        requestPOST(kServerAddress+"/api/v1/extend/order/ReviewsAdd", parameters: params as? [String : AnyObject], code: "JSON") { (request, response, data, dictionary, error) -> Void in
+        requestPOST(kServerAddress+"/api/v1/extend/order/ReviewsAdd", parameters: params as? [String : AnyObject]) { (request, response, data, dictionary, error) -> Void in
             if let dic = dictionary,success = dic["success"] as? Bool where success.boolValue {
                 let commentItems = ZMDCommentItem.mj_objectArrayWithKeyValuesArray(dic["productReviews"])
                 completion(success: true, error: nil, productReviews: commentItems)

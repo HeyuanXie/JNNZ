@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //配置分享
         ZMDShareSDKTool.startShare()
         
+        self.configPGY(launchOptions)
         self.configXGPush(launchOptions)
         
         // 开启推送服务
@@ -145,7 +146,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    //MARK: - PrivateMethod
+    //MARK: - ************PrivateMethod************
+    //MARK:蒲公英SDK配置
+    func configPGY(launchOptions: [NSObject: AnyObject]?) {
+        //启动基本SDK
+        PgyManager.sharedPgyManager().startManagerWithAppId(PGY_APPID)
+        //启动更新检查SDK
+        PgyUpdateManager.sharedPgyManager().startManagerWithAppId(PGY_APPID)
+        //关闭用户反馈,默认开启
+        PgyManager.sharedPgyManager().enableFeedback = false
+        //检测更新
+        PgyUpdateManager.sharedPgyManager().checkUpdate()
+    }
+    
+    //MARK:信鸽推送SDK配置
     func configXGPush(launchOptions: [NSObject: AnyObject]?) {
         self.registerPushForIOS8()
         XGPush.startApp(UInt32((XG_AccessId as NSString).integerValue) , appKey: XG_AccessKey)

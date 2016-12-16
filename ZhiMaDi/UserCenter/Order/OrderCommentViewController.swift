@@ -204,6 +204,10 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         mulStr.replaceCharactersInRange(range, withString: text)
         submitBtn.backgroundColor = mulStr.length == 0 ? grayButtonBackgroundColor : defaultSelectColor
         submitBtn.userInteractionEnabled = mulStr.length == 0 ? false : true
+        
+        let section = textView.tag
+        let frame = textView.frame
+        let size = (mulStr as! String).sizeWithFont(UIFont.systemFontOfSize(15), maxWidth: frame.width)
         return true
     }
     
@@ -410,14 +414,21 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         headViewBg.addSubview(imgView)
         imgView.tag = 10001
         //评论
-        let scoreTextView = ZMDTool.getTextView(CGRect(x: padding+75+5, y: 12, width: CGRectGetWidth(headViewBg.frame)-5*2-75-padding, height: 130), placeholder: "感谢您的宝贵评价~", fontSize: 16)
+        let scoreTextView = ZMDTool.getTextView(CGRect(x: padding+75+5, y: 12, width: CGRectGetWidth(headViewBg.frame)-5*2-75-padding, height: 130), placeholder: "感谢您的宝贵评价~", fontSize: 15)
         scoreTextView.delegate = self
+        scoreTextView.scrollEnabled = false
         headViewBg.addSubview(scoreTextView)
         scoreTextView.tag = section
         //买家秀
         let photoView = UIView(frame: CGRect(x: 0, y: 130, width: kScreenWidth-24, height: 116))
         photoView.backgroundColor = UIColor.clearColor()
         headViewBg.addSubview(photoView)
+        photoView.snp_makeConstraints { (make) -> Void in
+            make.top.equalTo(scoreTextView.snp_bottom).offset(0)
+            make.left.equalTo(0)
+            make.right.equalTo(0)
+            make.height.equalTo(116)
+        }
         photoView.tag = 10003
         //差评、中评、好评
         let faceScoreView = UIView(frame: CGRect(x: 0, y: 140+116, width: kScreenWidth-24, height: 60))

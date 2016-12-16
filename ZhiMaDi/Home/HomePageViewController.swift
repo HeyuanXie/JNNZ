@@ -181,6 +181,8 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     var miniAds = NSMutableArray()
     
     var requestDataNumber = 0       //记录fetchCategories的次数
+    
+    //MARK: - ****************LifeCircle******************
     override func viewDidLoad() {
         super.viewDidLoad()
         // 让导航栏支持右滑返回功能
@@ -195,7 +197,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         self.setupNewNavigation()
         //检测版本更新
         if APP_HOMEPAGELAUNCHTIMES == 1 {
-            self.checkUpdate()
+//            self.checkUpdate()
         }
     }
     override func viewWillDisappear(animated: Bool) {
@@ -206,75 +208,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    //MARK: checkUpdate
-    func checkUpdate() {
-        var version = "0.0.0"
-        QNNetworkTool.checkUpdate { (error, dictionary) in
-            if let dic = dictionary,arr = dic["results"] as? NSArray, resultCount = dic["resultCount"] as? Int where resultCount != 0 {
-                if let dict = arr[0] as? NSDictionary {
-                    if let appStoreVersion = dict["version"] as? String  {
-                        version = appStoreVersion
-                        saveObjectToUserDefaults("appStoreVersion", value: version)
-                        self.compareTheVersion()
-                    }
-                }
-            }
-        }
-    }
-    
-    func compareTheVersion() {
-        let appStoreVersion = getObjectFromUserDefaults("appStoreVersion") as! String
-        if appStoreVersion == "0.0.0" {
-            return
-        }
-        let result = compareVersion(APP_VERSION, version2: appStoreVersion)
-        if result == NSComparisonResult.OrderedAscending {
-            self.commonAlertShow(true, btnTitle1: "确定", btnTitle2: "下一次", title: "版本更新", message: "检测到新版本\(appStoreVersion)可用\n是否立即更新?", preferredStyle: .Alert)
-        }
-    }
-    
-    
-    
-    //MARK: TextFieldDelegate
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        self.view.endEditing(true)
-        if textField.text != "" {
-            let vc = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
-            vc.titleForFilter = textField.text ?? ""
-            vc.hidesBottomBarWhenPushed = true
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        return true
-    }
-    //MARK: searchBarDelegate
-    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
-        let vc = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
-        vc.titleForFilter = searchBar.text ?? ""
-        vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    //MARK: 广告分区cycleScrollView delegate
-    func clickImgAtIndex(index: Int) {
-        //点击cycleScrollView中图片，响应事件
-        if let advertisementAll = self.advertisementAll,top = advertisementAll.top {
-            let advertisement = top[index]
-            self.advertisementClick(advertisement)
-        }
-    }
-    
-    //MARK: CommonAlert Action重写
-    override func alertDestructiveAction() {
-        if let url = NSURL(string: APP_URL_IN_ITUNES) {
-            UIApplication.sharedApplication().openURL(url)
-        }
-    }
-    override func alertSingleAction() {
-        
-    }
-    
-    
+
     //MARK:- UITableViewDataSource,UITableViewDelegate
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section > 1 {
@@ -374,7 +308,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
 //            }
 //        }
     }
-
+    
+    
+    //MARK: - *****************TableViewCell******************
     //MARK: 头部菜单 cell
     func cellForHomeHead(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
         let cellId = "HeadCell"
@@ -762,7 +698,46 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     }
     
     
-    //MARK:点击广告的响应方法
+    //MARK: - ****************PrivateMethod*****************
+    //MARK: dataInit
+    private func dataInit(){
+        self.userCenterData = [.HomeContentTypeAd,.HomeContentTypeMenu,.HomeContentTypeMulity,.HomeContentTypeMulity,.HomeContentTypeMulity]
+        
+        self.menuType = [MenuType.kKSNongTe,.kDaZongJiaoYi,.kTuanGou,.kLingQuan,.kGongQiu,.kJiaDianXiaXiang,.kKSGongYi,.kNongCunJinRong,.kBianMinFuWu,.kFuWuZhan]
+    }
+    
+    func updateUI() {
+        self.currentTableView.backgroundColor = tableViewdefaultBackgroundColor
+    }
+    
+    //MARK: checkUpdate
+    func checkUpdate() {
+        var version = "0.0.0"
+        QNNetworkTool.checkUpdate { (error, dictionary) in
+            if let dic = dictionary,arr = dic["results"] as? NSArray, resultCount = dic["resultCount"] as? Int where resultCount != 0 {
+                if let dict = arr[0] as? NSDictionary {
+                    if let appStoreVersion = dict["version"] as? String  {
+                        version = appStoreVersion
+                        saveObjectToUserDefaults("appStoreVersion", value: version)
+                        self.compareTheVersion()
+                    }
+                }
+            }
+        }
+    }
+    
+    func compareTheVersion() {
+        let appStoreVersion = getObjectFromUserDefaults("appStoreVersion") as! String
+        if appStoreVersion == "0.0.0" {
+            return
+        }
+        let result = compareVersion(APP_VERSION, version2: appStoreVersion)
+        if result == NSComparisonResult.OrderedAscending {
+            self.commonAlertShow(true, btnTitle1: "确定", btnTitle2: "下一次", title: "版本更新", message: "检测到新版本\(appStoreVersion)可用\n是否立即更新?", preferredStyle: .Alert)
+        }
+    }
+    
+    //MARK:advertisementClick
     func advertisementClick(advertisement: ZMDAdvertisement){
         if let other1 = advertisement.Other1,let other2 = advertisement.Other2,let linkUrl = advertisement.LinkUrl{
             let other1 = other1 as String
@@ -910,6 +885,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     }
     
     
+    //MARK: NetWork
     func fetchData() {
         ZMDTool.showActivityView(nil, inView: nil, 20)
         let queue = dispatch_get_global_queue(0, 0)
@@ -1001,18 +977,44 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         }
     }
     
-    private func dataInit(){
-        self.userCenterData = [.HomeContentTypeAd,.HomeContentTypeMenu,.HomeContentTypeMulity,.HomeContentTypeMulity,.HomeContentTypeMulity]
+    
+    //MARK: - ***************Delegate***************
+    //MARK: TextFieldDelegate
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        if textField.text != "" {
+            let vc = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
+            vc.titleForFilter = textField.text ?? ""
+            vc.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        return true
+    }
+    //MARK: searchBarDelegate
+    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        let vc = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
+        vc.titleForFilter = searchBar.text ?? ""
+        vc.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    //MARK: 广告分区cycleScrollView delegate
+    func clickImgAtIndex(index: Int) {
+        //点击cycleScrollView中图片，响应事件
+        if let advertisementAll = self.advertisementAll,top = advertisementAll.top {
+            let advertisement = top[index]
+            self.advertisementClick(advertisement)
+        }
+    }
+
+    //MARK: - ***************Override***************
+    //MARK: CommonAlert Action重写
+    override func alertDestructiveAction() {
+        if let url = NSURL(string: APP_URL_IN_ITUNES) {
+            UIApplication.sharedApplication().openURL(url)
+        }
+    }
+    override func alertSingleAction() {
         
-        self.menuType = [MenuType.kKSNongTe,.kDaZongJiaoYi,.kTuanGou,.kLingQuan,.kGongQiu,.kJiaDianXiaXiang,.kKSGongYi,.kNongCunJinRong,.kBianMinFuWu,.kFuWuZhan]
-    }
-    
-    func updateUI() {
-        self.currentTableView.backgroundColor = tableViewdefaultBackgroundColor
-    }
-    
-    //重写设置状态栏方法
-    override func preferredStatusBarStyle() -> UIStatusBarStyle {
-        return .LightContent
     }
 }

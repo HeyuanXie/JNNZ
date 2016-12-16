@@ -41,7 +41,7 @@ class ShoppingCartViewController: UIViewController,UITableViewDataSource,UITable
     
     //MARK:- UITableViewDataSource,UITableViewDelegate
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.dataArray.count == 0 ? 0 : self.dataArray.count
+        return self.dataArray.count
     }
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
@@ -54,12 +54,7 @@ class ShoppingCartViewController: UIViewController,UITableViewDataSource,UITable
         return 0
     }
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-//        if indexPath.row == 0 {
-//            return 16
-//        } else {
-//            return indexPath.row == 1 ? 48 : 110
-//        }
-        return indexPath.row == 0 ? 0 : 110
+        return 110
     }
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = ZMDTool.getLine(CGRect(x: 0, y: 0, width: kScreenWidth, height: 1))
@@ -91,14 +86,14 @@ class ShoppingCartViewController: UIViewController,UITableViewDataSource,UITable
         return cell
     }
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if indexPath.row == 0 {
-            let store : ZMDStoreDetail = (self.dataArray[0] as! ZMDShoppingItem).Store
-            let vc = StoreShowHomeViewController.CreateFromMainStoryboard() as! StoreShowHomeViewController
-            vc.storeId = store.Id
-            vc.hidesBottomBarWhenPushed = true
-            self.navigationController?.pushViewController(vc, animated: true)
-            return
-        }
+//        if indexPath.row == 0 {
+//            let store : ZMDStoreDetail = (self.dataArray[0] as! ZMDShoppingItem).Store
+//            let vc = StoreShowHomeViewController.CreateFromMainStoryboard() as! StoreShowHomeViewController
+//            vc.storeId = store.Id
+//            vc.hidesBottomBarWhenPushed = true
+//            self.navigationController?.pushViewController(vc, animated: true)
+//            return
+//        }
         let item = self.dataArray[indexPath.row] as! ZMDShoppingItem
         let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
         vc.hidesBottomBarWhenPushed = true
