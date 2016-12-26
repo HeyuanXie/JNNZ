@@ -142,8 +142,9 @@ private extension QNNetworkTool {
                         return
                     }
                     completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "返回的为array", code: 10086, userInfo: nil));
+                }else{
+                    completionHandler(request: $0!, response: $1, data: $2, dictionary: dictionary, error: nil)
                 }
-                completionHandler(request: $0!, response: $1, data: $2, dictionary: dictionary, error: nil)
             }
             catch {
                 completionHandler(request: $0!, response: $1, data: $2, dictionary: nil, error: NSError(domain: "JSON解析错误", code: 10086, userInfo: nil));
@@ -316,7 +317,7 @@ extension QNNetworkTool {
     }
     // 手机发送验证码
     class func sendCode(phone:String,completion: (success: Bool!,error:NSError?,dictionary:NSDictionary?) -> Void){
-        requestPOST(kServerAddress + "/api/v1/extend/Login/SendCode", parameters: paramsToJsonDataParams(["mobile" : phone])) { (_,response, _, dictionary, error) -> Void in
+        requestPOST(kServerAddress + "/api/v1/extend/Login/SendCode", parameters: paramsToJsonDataParams(["mobile" : phone,"templateId":"SMS_16666270"])) { (_,response, _, dictionary, error) -> Void in
 //            guard let dic = dictionary , let succeed = dic["Success"] as? NSNumber else {
             guard let dic = dictionary , let succeed = dic["success"] as? NSNumber else {
                 completion(success:false,error: error,dictionary:nil)
@@ -535,23 +536,29 @@ extension QNNetworkTool {
         }
     }
     
-    class func sortCategories(completion:(category:NSArray?,error:NSError?,dicitonary:NSDictionary?)->Void) {
-        requestGET(kServerAddress+"/api/v1/extend/Product/HomepageCategories", parameters: nil) { (request, response, data, dictionary, error) -> Void in
-            if data != nil {
+    
+    //MARK:分类页面的数据
+    class func sortCategories(completion: (categories:NSArray?,error:NSError?,dictionary:NSDictionary?) -> Void) {
+        requestGET(kServerAddress + "/api/v1/extend/Product/HomepageCategories", parameters: nil) { (_, _, data, _, error) -> Void in
+            if data != nil{
                 do {
-                    let jsonObject:AnyObject = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
-                    guard let array = jsonObject as? NSArray else{
-                        completion(category: nil, error: error, dicitonary: dictionary)
+                    let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
+                    guard let array = jsonObject as? NSArray else {
+                        completion(categories:nil,error: error,dictionary:nil)
                         return
                     }
-                    let categorys = ZMDXHYCategory.mj_objectArrayWithKeyValuesArray(array)
-                    completion(category: categorys, error: nil, dicitonary: dictionary)
+                    let categories = ZMDSortCategory.mj_objectArrayWithKeyValuesArray(array)
+                    completion(categories:categories,error: nil,dictionary:nil)
                 } catch {
-                    println("JSON解析过程出错")
+                    println("Json解析过程出错")
                 }
+            }else {
+                completion(categories:nil,error: error,dictionary:nil)
             }
         }
     }
+    
+    
     /**
      获取详情页
      

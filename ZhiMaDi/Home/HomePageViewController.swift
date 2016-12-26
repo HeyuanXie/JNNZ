@@ -400,7 +400,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         let imgUrls = NSMutableArray()
         if self.advertisementAll != nil && self.advertisementAll.top != nil {
             for id in self.advertisementAll.top! {
-                var url = kImageAddressNew + (id.ResourcesCDNPath ?? "")
+                var url = kImageAddressMain + (id.ResourcesCDNPath ?? "")
                 if id.ResourcesCDNPath!.hasPrefix("http") {
                     url = id.ResourcesCDNPath!
                 }
@@ -454,7 +454,19 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             let label = cell?.contentView.viewWithTag(10010 + i) as! UILabel
             let imgV = cell?.contentView.viewWithTag(10020 + i) as! UIImageView
             btn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
-                
+                switch menuType {
+                case .kKSNongTe:
+                    if let url = NSURL(string: "appJNNT://") {
+                        UIApplication.sharedApplication().openURL(url)
+                    }
+                case .kDaZongJiaoYi:
+                    if let url = NSURL(string: "appDZJY://") {
+                        UIApplication.sharedApplication().openURL(url)
+                    }
+                default:
+                    ZMDTool.showPromptView("功能开发中,敬请期待!")
+                    break
+                }
                 return RACSignal.empty()
             })
             label.text = menuType.title

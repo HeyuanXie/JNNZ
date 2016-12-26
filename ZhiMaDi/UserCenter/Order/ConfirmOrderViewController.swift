@@ -770,7 +770,7 @@ class ConfirmOrderViewController: UIViewController,UITableViewDataSource,UITable
     }
     
     private func dataInit(){
-        self.userCenterData = [[.AddressSelect,.DSAddressSelect],[.Goods],[.GoodsCount,.Mark], [.Invoice,.InvoiceType,.InvoiceDetail,.InvoiceFor],[.UseDiscount]]
+        self.userCenterData = [[.AddressSelect,.DSAddressSelect],[.Goods],[.GoodsCount,.Mark],/* [.Invoice,.InvoiceType,.InvoiceDetail,.InvoiceFor],*/[.UseDiscount]]
     }
     //获取本订单的各种金额(商品金额、运费)
     func getTotal() {
@@ -791,7 +791,7 @@ class ConfirmOrderViewController: UIViewController,UITableViewDataSource,UITable
                 
                 if self.didChoseAddress == true {
                     //如果选择了地址，则可以计算运费，更改tableView类型
-                    self.userCenterData = [[.AddressSelect,.DSAddressSelect],[.Goods],[.freight,.GoodsCount,.Mark], [.Invoice,.InvoiceType,.InvoiceDetail,.InvoiceFor],[.UseDiscount]]
+                    self.userCenterData = [[.AddressSelect,.DSAddressSelect],[.Goods],[.freight,.GoodsCount,.Mark]/*,[.Invoice,.InvoiceType,.InvoiceDetail,.InvoiceFor]*/,[.UseDiscount]]
                 }
                 self.currentTableView.reloadData()
             } else {

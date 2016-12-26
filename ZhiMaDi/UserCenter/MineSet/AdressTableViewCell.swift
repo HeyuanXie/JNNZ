@@ -73,7 +73,7 @@ class AdressTableViewDaiShouCell :UITableViewCell {
         // Configure the view for the selected state
     }
     class func configCell(cell:AdressTableViewDaiShouCell,address:ZMDDSAddress) {
-        cell.title.text = "代收人: " + address.Name + "   电话: \(address.Phone)"
+        cell.title.text = "代收人: " + address.Name + "   \(address.Phone)"
         cell.title.font = UIFont.systemFontOfSize(15)
         cell.address.text = "网点地址: "+(address.Address1 ?? "") + (address.Address2 ?? "")
     }

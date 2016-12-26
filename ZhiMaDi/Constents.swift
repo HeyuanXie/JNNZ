@@ -14,6 +14,9 @@ let PATH_CACHES = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.Cach
 /// Documents 目录
 let PATH_DOCUMENTS = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentationDirectory, NSSearchPathDomainMask.UserDomainMask, true).first
 
+/// 是否为调试状态
+var IS_DEBUG = false
+
 // MARK: - Application information
 /// App ID (必须与 iTunes Connect 上设置的一致)
 let APP_ID  = "919849264"
@@ -173,12 +176,4 @@ func compareVersion(version1: String, version2: String) -> NSComparisonResult? {
     func NSLog(format: String, args: CVarArgType...) {}
 #endif
 
-////自定义打印
-//func HYLog<T>(message : T, file : String = __FILE__, lineNumber : Int = __LINE__) {
-//    #if DEBUG
-//        let fileName = (file as NSString).lastPathComponent
-//        print("[\(fileName):line:\(lineNumber)]- \(message)")
-//        
-//    #endif
-//}
 
