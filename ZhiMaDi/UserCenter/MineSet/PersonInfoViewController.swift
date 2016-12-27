@@ -103,7 +103,7 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         return self.userCenterData.count
     }
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return (section == self.userCenterData.count - 1) ? 16 : 1
+        return (section == self.userCenterData.count - 1) ? 12 : 1
     }
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 0
@@ -112,7 +112,7 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         return indexPath.section == 0 ? 85 : tableViewCellDefaultHeight
     }
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headView = UIView(frame: CGRectMake(0, 0, kScreenWidth, 16))
+        let headView = UIView(frame: CGRectMake(0, 0, kScreenWidth, 12))
         headView.backgroundColor = UIColor.clearColor()
         return headView
     }
@@ -319,7 +319,8 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         let btn = ZMDTool.getButton(CGRect(x: 12, y: 64, width: kScreenWidth - 24, height: 50), textForNormal: text, fontSize: 17,textColorForNormal:RGB(173,173,173,1), backgroundColor: UIColor.clearColor()) { (sender) -> Void in
             cleanPassword()
             g_customerId = nil
-            ZMDTool.enterLoginViewController()
+            self.navigationController?.popToRootViewControllerAnimated(true)
+//            ZMDTool.enterLoginViewController()
         }
         btn.center = footV.center
         ZMDTool.configViewLayerWithSize(btn, size: 20)
@@ -328,7 +329,7 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         self.tableView.tableFooterView = footV
     }
     private func dataInit(){
-        self.userCenterData = [UserCenterCellType.Head,UserCenterCellType.NickN ,/*UserCenterCellType.RealName,*/ UserCenterCellType.Address, UserCenterCellType.ChangePs, UserCenterCellType.Clean]
+        self.userCenterData = [UserCenterCellType.Head,UserCenterCellType.NickN,UserCenterCellType.ChangePs, UserCenterCellType.Clean]
     }
     //MARK:创建moreView
     func moreViewUpdate() {

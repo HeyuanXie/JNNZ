@@ -147,21 +147,10 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
     var isSaveImage = false
     
     var headImageData : NSData!
-    var btn : UIButton!
     
     var orderNumberDic :NSMutableDictionary!
     override func viewDidLoad() {
         super.viewDidLoad()
-//        if !g_isLogin {
-//            ZMDTool.enterLoginViewController()
-//        }
-        self.btn = UIButton(frame: self.view.bounds)
-        self.btn.userInteractionEnabled = g_isLogin! ? false : true
-        self.btn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
-            ZMDTool.enterLoginViewController()
-            return RACSignal.empty()
-        })
-        self.view.addSubview(self.btn)
         // 让导航栏支持右滑返回功能
         ZMDTool.addInteractive(self.navigationController)
         self.updateUI()
@@ -188,13 +177,13 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
         return self.userCenterData.count
     }
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return section == 0 ? 0 : 16
+        return section == 0 ? 0 : 12
     }
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 0
     }
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headView = UIView(frame: CGRectMake(0, 0, kScreenWidth, 16))
+        let headView = UIView(frame: CGRectMake(0, 0, kScreenWidth, 12))
         headView.backgroundColor = UIColor.clearColor()
         return headView
     }
@@ -216,17 +205,16 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             let cell = tableView.dequeueReusableCellWithIdentifier(cellId)
             //设置背景图和用户图像(圆形)
             if let backgroundV = cell?.viewWithTag(10000) as? UIImageView {
-                ZMDTool.configViewLayer(backgroundV)
-                if let urlStr = g_customer?.Avatar?.AvatarUrl,url = NSURL(string: urlStr){
-                    backgroundV.sd_setImageWithURL(url, placeholderImage: nil)
-                }
+                backgroundV.image = UIImage(named: "store_home_bg")
                 cell?.sendSubviewToBack(backgroundV)
             }
             
             if let personImgV = cell!.viewWithTag(10001) as? UIImageView{
                 ZMDTool.configViewLayerWithSize(personImgV, size: 42)
-                if let urlStr = g_customer?.Avatar?.AvatarUrl,url = NSURL(string: urlStr) {
-                    personImgV.sd_setImageWithURL(url, placeholderImage: nil)
+                if !g_isLogin {
+                    personImgV.image = UIImage(named: "示例头像")
+                }else if let urlStr = g_customer?.Avatar?.AvatarUrl,url = NSURL(string: urlStr) {
+                    personImgV.sd_setImageWithURL(url, placeholderImage: UIImage(named: "示例头像"))
                 }
             }
             //设置用户名Label.text
@@ -235,6 +223,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
                 usrNameLbl.textColor = UIColor.whiteColor()
                 if g_isLogin! {
                     usrNameLbl.text = getObjectFromUserDefaults("nickName") as? String
+                    usrNameLbl.font = defaultTextSize
                 }else{
                     usrNameLbl.text = "登陆 | 注册"
                     usrNameLbl.font = UIFont.boldSystemFontOfSize(17)
@@ -244,6 +233,9 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             //收藏的商品
             let collectionBtn = cell?.viewWithTag(10003) as! UIButton
             collectionBtn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+                if !self.checkLogin() {
+                    return RACSignal.empty()
+                }
                 let vc = MineCollectionViewController()
                 vc.hidesBottomBarWhenPushed = true
                 self.navigationController?.pushViewController(vc, animated: true)
@@ -253,8 +245,9 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             //关注的店铺
             let followBtn = cell?.viewWithTag(10004) as! UIButton
             followBtn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
-                
-                ZMDTool.showPromptView("功能暂未开放!")
+                if !self.checkLogin() {
+                    return RACSignal.empty()
+                }
                 return RACSignal.empty()
             })
             return cell!
@@ -262,7 +255,11 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             let cellId = "MyOrderCell"
             let cell = tableView.dequeueReusableCellWithIdentifier(cellId)
             if let dic = self.orderNumberDic,total = dic["Total"] {
-                (cell?.viewWithTag(1000) as!UILabel).attributedText = "我的订单 (\(total))".AttributedText("\(total)", color: defaultSelectColor)
+                if !g_isLogin {
+                    (cell?.viewWithTag(1000) as! UILabel).text = "我的订单"
+                }else{
+                    (cell?.viewWithTag(1000) as!UILabel).attributedText = "我的订单 (\(total))".AttributedText("\(total)", color: defaultSelectColor)
+                }
             }
             return cell!
         case .UserMyOrderMenu :
@@ -281,6 +278,9 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
                     let width = kScreenWidth/5,height = CGFloat(55)
                     let x = CGFloat(i) * width
                     let btn = ZMDTool.getButton(CGRect(x: x, y: 0, width: width, height: height), textForNormal: title, fontSize: 14, backgroundColor: UIColor.clearColor(), blockForCli: { (sender) -> Void in
+                        if !self.checkLogin() {
+                            return
+                        }
                         //点击订单目录(待付款。。。。)
                         let index = Int(x/width) + 1
                         if index == 5 {
@@ -319,7 +319,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             if let orderNumber = self.orderNumberDic,waitPay = orderNumber["WaitPay"],waitDelivery = orderNumber["WaitDelivery"],waitReceivce = orderNumber["WaitReceivce"],waitReview = orderNumber["WaitReview"],afterSale = orderNumber["AfterSale"],complete = orderNumber["Complete"] {
                 /*let numbers = [waitPay,waitDelivery,waitReceivce,complete,afterSale]
                 let status = ["待付款","待发货","待收货","已完成","退货/售后"]*/
-                let numbers = [waitPay,waitDelivery,waitReceivce,waitReview,afterSale]
+                let numbers = !g_isLogin ? ["0","0","0","0","0"] : [waitPay,waitDelivery,waitReceivce,waitReview,afterSale]
                 let status = ["待付款","待发货","待收货","待评价","退货/售后"]
                 for index in 0..<numbers.count {
                     let title = "\(numbers[index])\n\(status[index])"
@@ -362,6 +362,9 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        if !self.checkLogin() {
+            return
+        }
         let cellType = self.userCenterData[indexPath.section][indexPath.row]
         switch cellType{
         case .UserHead :
@@ -405,8 +408,6 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
     private func dataInit(){
         //目前功能
         self.userCenterData = [[.UserHead,.UserMyOrder,.UserMyOrderMenu], [.UserCardVolume],[.UserAddress],[.UserHelp],]
-        //全部功能
-//        self.userCenterData = [[.UserHead,.UserMyOrder,.UserMyOrderMenu],[.UserWallet,.UserCardVolume,.UserMyCrowdFunding],[.UserMyStore,.UserVipClub,.UserCommission,.UserInvitation],[.UserHelp],[.UserMore]]
         
         if g_isLogin! {
             //获取订单数目
@@ -417,6 +418,14 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
                 }
             }
         }
+    }
+    
+    private func checkLogin() -> Bool {
+        if !g_isLogin {
+            ZMDTool.enterLoginViewController()
+            return false
+        }
+        return true
     }
     
 }
