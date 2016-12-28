@@ -184,7 +184,7 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Home/HomeBuyListViewController.swift"
-                  timestampString = "504526603.391728"
+                  timestampString = "504584564.147854"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "151"
@@ -199,7 +199,7 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Home/HomeBuyListViewController.swift"
-                  timestampString = "504526603.391933"
+                  timestampString = "504584564.147993"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "152"
@@ -232,28 +232,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZhiMaDi/Tools/QNNetworkTool.swift"
-            timestampString = "504090899.40584"
+            timestampString = "504582038.408201"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "938"
-            endingLineNumber = "938"
+            startingLineNumber = "935"
+            endingLineNumber = "935"
             landmarkName = "rePostPayment(_:Paymentmethod:completion:)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ZhiMaDi/Tools/QNNetworkTool.swift"
-            timestampString = "504090899.40584"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "733"
-            endingLineNumber = "733"
-            landmarkName = "fetchCustomerCoupons(_:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -324,63 +308,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ZhiMaDi/Tools/QNNetworkTool.swift"
-            timestampString = "504090899.40584"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "763"
-            endingLineNumber = "763"
-            landmarkName = "fetchCustomerCouponsForOrder(_:)"
-            landmarkType = "5">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static ZhiMaDi.QNNetworkTool.fetchCustomerCouponsForOrder (ZhiMaDi.QNNetworkTool.Type)((coupons : Swift.Optional&lt;__ObjC.NSArray&gt;, dictionary : Swift.Optional&lt;__ObjC.NSDictionary&gt;, error : Swift.Optional&lt;__ObjC.NSError&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "ZhiMaDi"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/admin/Desktop/JNWorkSpace/JiangNan/ZhiMaDi/Tools/QNNetworkTool.swift"
-                  timestampString = "498359453.925305"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "626"
-                  endingLineNumber = "626"
-                  offsetFromSymbolStart = "23">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static ZhiMaDi.QNNetworkTool.(fetchCustomerCouponsForOrder (ZhiMaDi.QNNetworkTool.Type) -&gt; ((coupons : Swift.Optional&lt;__ObjC.NSArray&gt;, dictionary : Swift.Optional&lt;__ObjC.NSDictionary&gt;, error : Swift.Optional&lt;__ObjC.NSError&gt;) -&gt; ()) -&gt; ()).(closure #1)"
-                  moduleName = "ZhiMaDi"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/admin/Desktop/JNWorkSpace/JiangNan/ZhiMaDi/Tools/QNNetworkTool.swift"
-                  timestampString = "498359453.925468"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "626"
-                  endingLineNumber = "626"
-                  offsetFromSymbolStart = "39">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZhiMaDi/Tools/QNNetworkTool.swift"
-            timestampString = "504090899.40584"
+            timestampString = "504582038.408201"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "893"
-            endingLineNumber = "893"
+            startingLineNumber = "890"
+            endingLineNumber = "890"
             landmarkName = "fetchOrder(_:completion:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -434,11 +370,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZhiMaDi/Tools/QNNetworkTool.swift"
-            timestampString = "504090899.40584"
+            timestampString = "504582038.408201"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "987"
-            endingLineNumber = "987"
+            startingLineNumber = "984"
+            endingLineNumber = "984"
             landmarkName = "uploadCommentPicture(_:fileName:params:completion:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -466,7 +402,7 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/UserCenter/Order/CashierViewController.swift"
-                  timestampString = "504526603.401215"
+                  timestampString = "504584564.154514"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "228"
@@ -481,7 +417,7 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/UserCenter/Order/CashierViewController.swift"
-                  timestampString = "504526603.401379"
+                  timestampString = "504584564.154662"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "229"

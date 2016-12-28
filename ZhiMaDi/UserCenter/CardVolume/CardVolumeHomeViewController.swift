@@ -124,7 +124,7 @@ class CardVolumeHomeViewController: UIViewController,UITableViewDataSource, UITa
             ZMDTool.configViewLayer(bgV)
             bgV.image = UIImage(named: "user_vipcard_bg")
             bgV.contentMode = .ScaleToFill
-            titleLbl.text = "葫芦堡旗舰店"
+            titleLbl.text = "咔村网旗舰店"
             conditionLbl.text = "有效期：长期有效"
             vipCardLbl.text = "VIP 银卡"
             return cell!

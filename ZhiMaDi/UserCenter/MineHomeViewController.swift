@@ -24,6 +24,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
         case UserCommission
         case UserInvitation
         
+        case UserCollect
         case UserAddress
         case UserHelp
         case UserMore
@@ -59,6 +60,8 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             case UserInvitation :
                 return "邀请好友注册"
                 
+            case .UserCollect:
+                return "我的收藏"
             case .UserAddress :
                 return "管理收货地址"
             case UserHelp :
@@ -87,6 +90,8 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             case UserInvitation :
                 return UIImage(named: "user_share")
 
+            case .UserCollect:
+                return UIImage(named: "user_collections")
             case .UserAddress :
                 return UIImage(named: "user_address")
             case UserHelp :
@@ -121,6 +126,8 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
                 viewController = UIViewController()
             case UserInvitation:
                 viewController = InvitationShareHomeViewController()
+            case .UserCollect:
+                viewController = MineCollectionViewController()
             case .UserAddress :
                 viewController = AddressViewController2.CreateFromMainStoryboard() as! AddressViewController2
                 (viewController as! AddressViewController2).canSelect = false
@@ -191,7 +198,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
         let cellType = self.userCenterData[indexPath.section][indexPath.row]
         switch cellType {
         case .UserHead:
-            return 190
+            return 180*kScreenWidth/375.0
         default :
             return 55
         }
@@ -210,6 +217,11 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
             }
             
             if let personImgV = cell!.viewWithTag(10001) as? UIImageView{
+                for constraint in personImgV.constraints {
+                    if constraint.firstAttribute == NSLayoutAttribute.Top {
+                        constraint.constant = 20*kScreenWidth/375.0
+                    }
+                }
                 ZMDTool.configViewLayerWithSize(personImgV, size: 42)
                 if !g_isLogin {
                     personImgV.image = UIImage(named: "示例头像")
@@ -407,7 +419,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
     
     private func dataInit(){
         //目前功能
-        self.userCenterData = [[.UserHead,.UserMyOrder,.UserMyOrderMenu], [.UserCardVolume],[.UserAddress],[.UserHelp],]
+        self.userCenterData = [[.UserHead,.UserMyOrder,.UserMyOrderMenu], [.UserCardVolume,.UserCollect],[.UserAddress],[.UserHelp]]
         
         if g_isLogin! {
             //获取订单数目

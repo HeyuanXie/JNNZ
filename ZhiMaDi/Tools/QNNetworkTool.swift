@@ -729,20 +729,17 @@ extension QNNetworkTool {
     // 用户优惠券（我的 -> 卡券)
     class func fetchCustomerCoupons(completion: (coupons : NSArray?,datas:NSData?,error: NSError?) -> Void) {
         requestPOST(kServerAddress + "/api/v1/extend/CustomerCoupons/Coupons", parameters: ["customerId":1]) { (_, _, data, _, error) -> Void in
-            do {
-                let jsonObject: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
-                guard let _ = jsonObject as? NSArray else {
-                    completion(coupons:nil,datas: nil, error: error)
-                    return
+            if data != nil {
+                do {
+                    let object : AnyObject? = try NSJSONSerialization.JSONObjectWithData(data as! NSData, options: NSJSONReadingOptions.MutableContainers)
+                    guard let _ = object as? NSArray else {
+                        completion(coupons: nil, datas: nil, error: error)
+                        return
+                    }
+                    let coupons = ZMDCoupon.mj_objectArrayWithKeyValuesArray(object)
+                    completion(coupons: coupons, datas: data as? NSData, error: nil)
                 }
-                guard let coupons = ZMDCoupon.mj_objectArrayWithKeyValuesArray(jsonObject) else {
-                    completion(coupons:nil,datas: nil, error: error)
-                    return
-                }
-                completion(coupons:coupons,datas: data as? NSData, error: nil)
-            }
-            catch {
-
+                catch{ }
             }
         }
     }
