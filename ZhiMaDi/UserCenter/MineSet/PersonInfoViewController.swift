@@ -17,6 +17,7 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         case ChangePs
         case Address
         case Clean
+        case Version
         
         init(){
             self = Head
@@ -37,6 +38,8 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
                 
             case Clean:
                 return "清理缓存"
+            case Version:
+                return "版本号"
             }
         }
 
@@ -54,6 +57,8 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
             case Address:
                 viewController = AddressViewController2.CreateFromMainStoryboard() as! AddressViewController2
             case Clean:
+                viewController = UIViewController()
+            default:
                 viewController = UIViewController()
             }
             viewController.hidesBottomBarWhenPushed = true
@@ -103,7 +108,8 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         return self.userCenterData.count
     }
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return (section == self.userCenterData.count - 1) ? 12 : 1
+        let cellType = self.userCenterData[section]
+        return cellType == .Clean ? 12 : 1
     }
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 0
@@ -177,6 +183,10 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
         case .Clean:
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+        case .Version:
+            cell.accessoryType = .None
+            let versionLbl = ZMDTool.getLabel(CGRectMake(kScreenWidth - 100 - 58, 0, 120, tableViewCellDefaultHeight), text: "V "+APP_VERSION_BUILD, fontSize: 17, textColor: defaultDetailTextColor, textAlignment: .Right)
+            cell.addSubview(versionLbl)
         }
         
         ZMDTool.configTableViewCellDefault(cell)
@@ -185,38 +195,44 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         let type = self.userCenterData[indexPath.section]
-        if indexPath.section == 0 {
-            switch type {
-            case .Head :
-                if !g_isLogin {
-                    self.commonAlertShow(true, title: "提示:未登录!", message: "是否立即登录?", preferredStyle: UIAlertControllerStyle.Alert)
-                    return
-                }
-                let actionSheet = UIActionSheet(title: nil, delegate: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil)
-                actionSheet.addButtonWithTitle("从手机相册选择")
-                actionSheet.addButtonWithTitle("拍照")
-                actionSheet.rac_buttonClickedSignal().subscribeNext({ (index) -> Void in
-                    if let indexInt = index as? Int {
-                        switch indexInt {
-                        case 1, 2:
-                            if self.picker == nil {
-                                self.picker = UIImagePickerController()
-                                self.picker!.delegate = self
-                            }
-                            
-                            self.picker!.sourceType = (indexInt == 1) ? .SavedPhotosAlbum : .Camera
-                            self.picker!.allowsEditing = true
-                            self.presentViewController(self.picker!, animated: true, completion: nil)
-                        default: break
-                        }
-                    }
-                })
-                actionSheet.showInView(self.view)
-            default: return
+        switch type {
+        case .Head:
+            if !g_isLogin {
+                self.commonAlertShow(true, title: "提示:未登录!", message: "是否立即登录?", preferredStyle: UIAlertControllerStyle.Alert)
+                return
             }
-        } else if indexPath.section == self.userCenterData.count - 1 {
+            let actionSheet = UIActionSheet(title: nil, delegate: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil)
+            actionSheet.addButtonWithTitle("从手机相册选择")
+            actionSheet.addButtonWithTitle("拍照")
+            actionSheet.rac_buttonClickedSignal().subscribeNext({ (index) -> Void in
+                if let indexInt = index as? Int {
+                    switch indexInt {
+                    case 1, 2:
+                        if self.picker == nil {
+                            self.picker = UIImagePickerController()
+                            self.picker!.delegate = self
+                        }
+                        
+                        self.picker!.sourceType = (indexInt == 1) ? .SavedPhotosAlbum : .Camera
+                        self.picker!.allowsEditing = true
+                        self.presentViewController(self.picker!, animated: true, completion: nil)
+                    default: break
+                    }
+                }
+            })
+            actionSheet.showInView(self.view)
+        case .NickN:
+            //点击昵称
+            let inputTextViewController = InputTextViewController()
+            inputTextViewController.hidesBottomBarWhenPushed = true
+            inputTextViewController.finished = { (text) -> Void in
+                self.nameLB.text = text
+                saveObjectToUserDefaults("nickName", value: text)
+            }
+            self.navigationController?.pushViewController(inputTextViewController, animated: true)
+        case .Clean:
             //计算缓存，计算完成菊花消失，显示alertView
-//            ZMDTool.showActivityView("请稍候")
+            //            ZMDTool.showActivityView("请稍候")
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
                 //计算缓存
                 let size = self.fileSizeOfCache()
@@ -230,24 +246,19 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
                         cleanAlert.removeFromParentViewController()
                     })
                     let action2 = UIAlertAction(title: "确定", style: UIAlertActionStyle.Destructive, handler: { (sender) -> Void in
-                        //清理缓存
-                        self.clearCache()
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            //清理缓存
+                            self.clearCache()
+                        })
                         ZMDTool.showPromptView("清理完成")
                     })
                     cleanAlert.addAction(action1)
                     cleanAlert.addAction(action2)
                 })
             })
-        }else if indexPath.section == 1 {
-            //点击昵称
-            let inputTextViewController = InputTextViewController()
-            inputTextViewController.hidesBottomBarWhenPushed = true
-            inputTextViewController.finished = { (text) -> Void in
-                self.nameLB.text = text
-                saveObjectToUserDefaults("nickName", value: text)
-            }
-            self.navigationController?.pushViewController(inputTextViewController, animated: true)
-        }else {
+        case .Version:
+            break
+        default:
             type.didSelect(self.navigationController!)
         }
     }
@@ -319,8 +330,7 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         let btn = ZMDTool.getButton(CGRect(x: 12, y: 64, width: kScreenWidth - 24, height: 50), textForNormal: text, fontSize: 17,textColorForNormal:RGB(173,173,173,1), backgroundColor: UIColor.clearColor()) { (sender) -> Void in
             cleanPassword()
             g_customerId = nil
-            self.navigationController?.popToRootViewControllerAnimated(true)
-//            ZMDTool.enterLoginViewController()
+            ZMDTool.enterLoginViewController()
         }
         btn.center = footV.center
         ZMDTool.configViewLayerWithSize(btn, size: 20)
@@ -329,7 +339,7 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
         self.tableView.tableFooterView = footV
     }
     private func dataInit(){
-        self.userCenterData = [UserCenterCellType.Head,UserCenterCellType.NickN,UserCenterCellType.ChangePs, UserCenterCellType.Clean]
+        self.userCenterData = [UserCenterCellType.Head,UserCenterCellType.NickN,UserCenterCellType.ChangePs, UserCenterCellType.Clean,.Version]
     }
     //MARK:创建moreView
     func moreViewUpdate() {
@@ -439,9 +449,10 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
                     
                 }
             }
-            SDImageCache.sharedImageCache().cleanDisk()
+            SDImageCache.sharedImageCache().clearDisk()
         }
     }
+
     
     
 }

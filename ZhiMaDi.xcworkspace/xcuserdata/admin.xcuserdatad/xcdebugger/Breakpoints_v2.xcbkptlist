@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZhiMaDi/Home/HomePageViewController.swift"
-            timestampString = "504189255.736735"
+            timestampString = "504611910.579482"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1037"
-            endingLineNumber = "1037">
+            startingLineNumber = "1045"
+            endingLineNumber = "1045">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -184,12 +184,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Home/HomeBuyListViewController.swift"
-                  timestampString = "504584564.147854"
+                  timestampString = "504617458.574771"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "151"
                   endingLineNumber = "151"
-                  offsetFromSymbolStart = "1301">
+                  offsetFromSymbolStart = "1236">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -199,12 +199,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Home/HomeBuyListViewController.swift"
-                  timestampString = "504584564.147993"
+                  timestampString = "504617458.574969"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "152"
                   endingLineNumber = "152"
-                  offsetFromSymbolStart = "27">
+                  offsetFromSymbolStart = "32">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -354,11 +354,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZhiMaDi/Home/HomePageViewController.swift"
-            timestampString = "504189255.736735"
+            timestampString = "504611910.579482"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "959"
-            endingLineNumber = "959"
+            startingLineNumber = "967"
+            endingLineNumber = "967"
             landmarkName = "fetchProducts(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -402,12 +402,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/UserCenter/Order/CashierViewController.swift"
-                  timestampString = "504584564.154514"
+                  timestampString = "504617458.661545"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "228"
                   endingLineNumber = "228"
-                  offsetFromSymbolStart = "1544">
+                  offsetFromSymbolStart = "1312">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -417,12 +417,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/UserCenter/Order/CashierViewController.swift"
-                  timestampString = "504584564.154662"
+                  timestampString = "504617458.661741"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "229"
                   endingLineNumber = "229"
-                  offsetFromSymbolStart = "26">
+                  offsetFromSymbolStart = "28">
                </Location>
             </Locations>
          </BreakpointContent>

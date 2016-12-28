@@ -463,6 +463,14 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                     if let url = NSURL(string: "appDZJY://") {
                         UIApplication.sharedApplication().openURL(url)
                     }
+                case .kGongQiu:
+                    if let url = NSURL(string: "appDZJY://") {
+                        UIApplication.sharedApplication().openURL(url)
+                    }
+                case .kKSGongYi:
+                    let vc = MyWebViewController()
+                    vc.webUrl = "http://www.ksnongte.com/t/gongyi"
+                    self.pushToVC(vc, animated: true, hideBottom: true)
                 default:
                     ZMDTool.showPromptView("功能开发中,敬请期待!")
                     break
@@ -764,7 +772,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
 //                self.navigationController?.pushViewController(vc, animated: true)
                 
                 let vc = MyWebViewController()
-                vc.webUrl = NSURL(string: linkUrl)
+                vc.webUrl = linkUrl
                 vc.hidesBottomBarWhenPushed = true
                 self.navigationController?.pushViewController(vc, animated: true)
                 break
@@ -776,7 +784,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 break
             default:
                 let vc = MyWebViewController()
-                vc.webUrl = NSURL(string: linkUrl)
+                vc.webUrl = linkUrl
                 vc.hidesBottomBarWhenPushed = true
                 self.navigationController?.pushViewController(vc, animated: true)
                 break
@@ -790,7 +798,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 self.pushToVC(vc, animated: true, hideBottom: true)
             }else if linkUrl != "" {
                 let vc = MyWebViewController()
-                vc.webUrl = NSURL(string: linkUrl)
+                vc.webUrl = linkUrl
                 self.pushToVC(vc, animated: true, hideBottom: true)
             }
         }
