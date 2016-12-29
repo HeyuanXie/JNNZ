@@ -299,7 +299,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
                             //退货、售后
                             let vc = MyOrderViewController.CreateFromMainStoryboard() as! MyOrderViewController
                             vc.isAfterSale = true
-                            vc.orderStatuId = 9
+                            vc.orderStatuId = 100
                             vc.orderStatusIndex = index
                             vc.hidesBottomBarWhenPushed = true
                             self.navigationController?.pushViewController(vc, animated: true)

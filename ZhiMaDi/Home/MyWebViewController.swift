@@ -31,9 +31,10 @@ class MyWebViewController: UIViewController,WKNavigationDelegate,WKScriptMessage
         self.configBackButton()
         self.configMoreButton()
         let titleLbl = ZMDTool.getLabel(CGRect(x: 0, y: 0, width: kScreenWidth, height: 20), text: "", fontSize: 17)
-        titleLbl.textColor = UIColor.whiteColor()
+        titleLbl.textColor = defaultTextColor
         titleLbl.textAlignment = .Center
         self.navigationItem.titleView = titleLbl
+        self.navigationController?.navigationBar.tintColor = defaultTextColor
         
         self.userCC = WKUserContentController()
         let jScript = "var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width'); document.getElementsByTagName('head')[0].appendChild(meta);user-scalable=no;"
@@ -86,7 +87,6 @@ class MyWebViewController: UIViewController,WKNavigationDelegate,WKScriptMessage
         if let title = webView.title {
             (self.navigationItem.titleView as! UILabel).text = title
         }
-        NSURLCache.sharedURLCache()
     }
     func webView(webView: WKWebView, didFailNavigation navigation: WKNavigation!, withError error: NSError) {
         ZMDTool.hiddenActivityView()

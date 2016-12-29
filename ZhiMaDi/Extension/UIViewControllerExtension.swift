@@ -71,13 +71,13 @@ extension UIViewController {
         self.navigationItem.leftBarButtonItem = item
     }
     public func configMsgButton() {
-        let item = UIBarButtonItem(image: UIImage(named: "Navi_Msg")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
+        let item = UIBarButtonItem(image: UIImage(named: "Navi_Msg")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("back"))
         item.customView?.tintColor = UIColor.blackColor()
         
         self.navigationItem.rightBarButtonItem = item
     }
     public func configMoreButton() {
-        let item = UIBarButtonItem(image: UIImage(named: "common_more")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate), style: UIBarButtonItemStyle.Done, target: self, action: Selector("gotoMore"))
+        let item = UIBarButtonItem(image: UIImage(named: "common_more")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal), style: UIBarButtonItemStyle.Done, target: self, action: Selector("gotoMore"))
         item.customView?.tintColor = UIColor.blackColor()
         
         self.navigationItem.rightBarButtonItem = item
