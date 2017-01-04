@@ -19,7 +19,7 @@ var IS_DEBUG = false
 
 // MARK: - Application information
 /// App ID (必须与 iTunes Connect 上设置的一致)
-let APP_ID  = "919849264"
+let APP_ID  = "1182283898"
 /// App SKU码 (必须与 iTunes Connect 上设置的一致)
 let APP_SKU = "com.qoocc.QooccHealth"
 /// App Bundle Id
@@ -79,6 +79,10 @@ let kScreenWidthZoom = kScreenWidth/320.0
 let kScreenWidthZoom6 = kScreenWidth/375.0
 /// 屏幕高度放大系数（相对于iPhone6/6S的屏幕）
 let kScreenHeightZoom6 = kScreenHeight/667.0
+/// 快速获取对应尺寸（相对于iPhone6/6S的屏幕）
+func zoom(value:CGFloat) -> CGFloat {
+    return value*kScreenWidth/375.0
+}
 
 // MARK: - NSUserDefaults.standardUserDefaults() 相关
 /// 从 NSUserDefaults.standardUserDefaults() 中获取数据

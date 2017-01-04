@@ -45,7 +45,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             case .HomeContentTypeRecommendation :
                 return 0
             case .HomeContentTypeTheme :
-//                return 16
+                //                return 16
                 return 30
             case HomeContentTypeMulity :
                 return 12
@@ -161,7 +161,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 viewController = UIViewController()
             }
             return viewController
-        } 
+        }
         
         //点击菜单选择，调用方法跳转
         func didSelect(navViewController:UINavigationController){
@@ -173,20 +173,24 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     
     var userCenterData: [UserCenterCellType]!
     var menuType: [MenuType]!
+    var menuDatas = NSMutableArray()  //自适应个数menuCell数据源
     var 下拉视窗 : UIView!
     var categories = NSMutableArray()
     var advertisementAll : ZMDAdvertisementAll!
+    var banners = NSMutableArray()  //轮播图
     var dyadicProducts  = NSMutableArray()  //二维数组,存放分类对应的产品数组
     var widgetNames = NSMutableArray()      //广告名数组
     var miniAds = NSMutableArray()
     
     var requestDataNumber = 0       //记录fetchCategories的次数
-    
+    var networkObserver : Reachability!
     //MARK: - ****************LifeCircle******************
     override func viewDidLoad() {
         super.viewDidLoad()
         // 让导航栏支持右滑返回功能
         ZMDTool.addInteractive(self.navigationController)
+        self.networkObserver = Reachability.reachabilityForInternetConnection()
+        networkObserver.startNotifier()
         self.updateUI()
         self.dataInit()
         self.fetchData()
@@ -197,7 +201,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         self.setupNewNavigation()
         //检测版本更新
         if APP_HOMEPAGELAUNCHTIMES == 1 {
-//            self.checkUpdate()
+            self.checkUpdate()
         }
     }
     override func viewWillDisappear(animated: Bool) {
@@ -208,7 +212,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     //MARK:- UITableViewDataSource,UITableViewDelegate
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section > 1 {
@@ -222,7 +226,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         }
     }
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-//        return self.userCenterData.count
+        //        return self.userCenterData.count
         return 2 + self.categories.count
     }
     
@@ -262,6 +266,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         return headView
     }
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        if indexPath.section == 1{
+            return self.menuDatas.count > 5 ? zoom(210) : zoom(105)
+        }
         if indexPath.section > 1 {
             switch indexPath.row {
             case 0 :
@@ -287,6 +294,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             return self.cellForHomeAd(tableView, indexPath: indexPath)
         case .HomeContentTypeMenu :
             return self.cellForHomeMenu(tableView, indexPath: indexPath)
+//                        return self.cellForHomeAutoMenu(tableView, indexPath: indexPath)
         case .HomeContentTypeGoods :
             return self.cellForHomeGoods(tableView, indexPath: indexPath)
         case .HomeContentTypeRecommendationHead :
@@ -301,12 +309,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-//        if indexPath.section == self.userCenterData.count-1 {
-//            if let advertisementAll = self.advertisementAll,topic = advertisementAll.topic {
-//                let advertisement = topic[indexPath.row]
-//                self.advertisementClick(advertisement)
-//            }
-//        }
+        
     }
     
     
@@ -371,8 +374,8 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 let homeBuyListViewController = HomeBuyListViewController.CreateFromMainStoryboard() as! HomeBuyListViewController
                 let titleFilter = (sender as! UIButton).titleLabel?.text
                 homeBuyListViewController.titleForFilter = titleFilter!
-//                let category = menuTitles[(sender as!UIButton).tag-1-1000] as! ZMDCategory
-//                homeBuyListViewController.Cid = category.Id.stringValue
+                //                let category = menuTitles[(sender as!UIButton).tag-1-1000] as! ZMDCategory
+                //                homeBuyListViewController.Cid = category.Id.stringValue
                 self.navigationController?.pushViewController(homeBuyListViewController, animated: true)
             })
             scrollView.addSubview(headBtn)
@@ -398,8 +401,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         cycleScroll.autoScroll = true
         cycleScroll.autoTime = 2.5
         let imgUrls = NSMutableArray()
-        if self.advertisementAll != nil && self.advertisementAll.top != nil {
-            for id in self.advertisementAll.top! {
+        if self.banners.count != 0 {
+            for id in self.banners {
+                let id = id as! ZMDAdvertisement
                 var url = kImageAddressMain + (id.ResourcesCDNPath ?? "")
                 if id.ResourcesCDNPath!.hasPrefix("http") {
                     url = id.ResourcesCDNPath!
@@ -414,7 +418,59 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         cell?.addSubview(cycleScroll)
         return cell!
     }
+    
     // 菜单
+    /// 广告形式自适应个数MenuCell
+    func cellForHomeAutoMenu(tableView:UITableView, indexPath: NSIndexPath) -> UITableViewCell {
+        let cellId = "AutoMenuCell"
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
+        if cell == nil {
+            cell = UITableViewCell(style: .Default, reuseIdentifier: cellId)
+            ZMDTool.configTableViewCellDefault(cell!)
+            
+            for var i=0;i<self.menuDatas.count;i++ {
+                let btnHeight = zoom(105)
+                let btnWidth = self.menuDatas.count >= 5 ? kScreenWidth/5 : kScreenWidth/CGFloat(self.menuDatas.count)
+                let btnX = CGFloat(i%5)*btnWidth
+                let btnY = i >= 5 ? zoom(100) : 0
+                let btn = UIButton(frame: CGRect(x: btnX, y: btnY, width: btnWidth, height: btnHeight))
+                btn.tag = 10000 + i
+                btn.backgroundColor = UIColor.whiteColor()
+                
+                let label = UILabel(frame: CGRectMake(0, btnHeight/2 + zoom(25), btnWidth, 14))
+                label.font = UIFont.systemFontOfSize(14)
+                label.textColor = defaultTextColor
+                label.textAlignment =  .Center
+                label.tag = 10010 + i
+                btn.addSubview(label)
+                
+                let imgV = UIImageView(frame: CGRectMake(btnWidth/2-25, btnHeight/2 - zoom(40), 50,50))
+                imgV.tag = 10020 + i
+                btn.addSubview(imgV)
+                cell!.contentView.addSubview(btn)
+            }
+            
+            for var i=0;i<self.menuDatas.count;i++ {
+                let btn = cell?.contentView.viewWithTag(10000 + i) as! UIButton
+                let label = cell?.contentView.viewWithTag(10010 + i) as! UILabel
+                let imgV = cell?.contentView.viewWithTag(10020 + i) as! UIImageView
+//                if self.menuDatas.count != 0 {
+//                    let ad = self.menuDatas[i] as! ZMDAdvertisement
+//                    label.text = ad.Title
+//                    imgV.sd_setImageWithURL(NSURL(string: kImageAddressMain+ad.ResourcesCDNPath!))
+//                    btn.rac_command = RACCommand(signalBlock: { (sender) -> RACSignal! in
+//                        self.advertisementClick(ad)
+//                        return RACSignal.empty()
+//                    })
+//                }
+                label.text = "\(i)"
+                imgV.image = UIImage.imageWithColor(appThemeColor, size: CGSize(width: 50, height: 50))
+            }
+        }
+        return cell!
+    }
+    
+    
     func cellForHomeMenu(tableView: UITableView,indexPath: NSIndexPath)-> UITableViewCell {
         let cellId = "MenuCell"
         var cell = tableView.dequeueReusableCellWithIdentifier(cellId)
@@ -443,7 +499,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 label.textAlignment =  .Center
                 label.tag = 10010 + i
                 btn.addSubview(label)
-            
+                
                 cell!.contentView.addSubview(btn)
             }
         }
@@ -480,20 +536,6 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             label.text = menuType.title
             imgV.image = menuType.image
             
-            //当请求数据成功时,更新cellForHomeMenu上btn的图片和title
-            /*if let advertisementAll = self.advertisementAll,icon = advertisementAll.icon {
-                if icon.count != 0 {
-                    let icon = i>=2 ? self.advertisementAll.icon![i+1] : self.advertisementAll.icon![i]
-                    //icon的title暂时自定义为 类目i
-                    label.text = icon.Title
-                    var url = kImageAddressNew + (icon.ResourcesCDNPath ?? "")
-                    if icon.ResourcesCDNPath!.hasPrefix("http") {
-                        url = icon.ResourcesCDNPath!
-                    }
-                    //没图片，暂时不用
-                    imgV.sd_setImageWithURL(NSURL(string: url), placeholderImage: nil)
-                }
-            }*/
         }
         return cell!
     }
@@ -562,7 +604,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                     self.navigationController?.pushViewController(vc, animated: true)
                     return RACSignal.empty()
                 })
-
+                
                 
                 let titleLbl = UILabel(frame: CGRectMake(0, btnHeight-15-11 - 10 - 11, width, 11))
                 titleLbl.font = UIFont.systemFontOfSize(11)
@@ -633,14 +675,11 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             }
             ZMDTool.configTableViewCellDefault(cell!)
             let imgView = cell?.contentView.viewWithTag(10000) as! UIImageView
-            imgView.image = UIImage(named: "banner0"+"\(indexPath.section-1)")
+            //            imgView.image = UIImage(named: "banner0"+"\(indexPath.section-1)")
             if let advertisements = self.miniAds as? NSArray where advertisements.count != 0 {
-//                if let advertisement =
+                let advertisement = advertisements[indexPath.section-2] as! ZMDAdvertisement
+                imgView.sd_setImageWithURL(NSURL(string: kImageAddressMain+advertisement.ResourcesCDNPath!), placeholderImage: nil)
             }
-//            if let advertisements = self.miniAds[indexPath.section-2] as? NSArray where advertisements.count != 0 {
-//                let advertisement = advertisements[0] as? ZMDAdvertisement
-//                imgView.sd_setImageWithURL(NSURL(string: kImageAddressMain+advertisement!.Resources!), placeholderImage: nil)
-//            }
             return cell!
         case 1:
             let cellId = "MulityTitleCell"
@@ -671,19 +710,16 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             let cellId = "MulityGoodTopCell"
             let cell = tableView.dequeueReusableCellWithIdentifier(cellId) as! HomeMulityGoodTopCell
             //点击btn
-            if self.dyadicProducts.count != 0 {
+            if self.dyadicProducts.count > indexPath.section-2 {
                 cell.products = self.dyadicProducts[indexPath.section-2] as! NSArray
             }
-//            if let products = self.dyadicProducts[indexPath.section-2] as? NSArray {
-//                cell.products = products
-//            }
             cell.btnClickFinish = {(productId:Int)->Void in
                 let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
                 vc.productId = productId
                 self.pushToVC(vc, animated: true, hideBottom: true)
             }
             ZMDTool.configTableViewCellDefault(cell)
-            if let dyadicProducts = self.dyadicProducts as? NSArray where dyadicProducts.count != 0 {
+            if let dyadicProducts = self.dyadicProducts as? NSArray where dyadicProducts.count > indexPath.section-2 {
                 if let products = dyadicProducts[indexPath.section-2] as? NSArray where products.count != 0 {
                     cell.updateUI(products)
                 }
@@ -696,18 +732,18 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             if self.dyadicProducts.count != 0 {
                 cell.products = self.dyadicProducts[indexPath.section-2] as! NSArray
             }
-//            if let products = self.dyadicProducts[indexPath.section-2] as? NSArray {
-//                cell.products = products
-//            }
+            //            if let products = self.dyadicProducts[indexPath.section-2] as? NSArray {
+            //                cell.products = products
+            //            }
             cell.btnClickFinish = {(productId:Int)->Void in
                 let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
                 vc.productId = productId
                 self.pushToVC(vc, animated: true, hideBottom: true)
             }
-        
+            
             cell.contentView.addSubview(ZMDTool.getLine(CGRect(x: 0, y: 0, width: cell.bounds.width, height: 0.5), backgroundColor: defaultLineColor))
             ZMDTool.configTableViewCellDefault(cell)
-
+            
             if let dyadicProducts = self.dyadicProducts as? NSArray where dyadicProducts.count != 0 {
                 if let products = dyadicProducts[indexPath.section-2] as? NSArray where products.count != 0 {
                     cell.updateUI(products)
@@ -724,6 +760,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         self.userCenterData = [.HomeContentTypeAd,.HomeContentTypeMenu,.HomeContentTypeMulity,.HomeContentTypeMulity,.HomeContentTypeMulity]
         
         self.menuType = [MenuType.kKSNongTe,.kDaZongJiaoYi,.kTuanGou,.kLingQuan,.kGongQiu,.kJiaDianXiaXiang,.kKSGongYi,.kNongCunJinRong,.kBianMinFuWu,.kFuWuZhan]
+        self.menuDatas = ["","","","","","",""]
     }
     
     func updateUI() {
@@ -765,11 +802,11 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             let linkUrl = linkUrl as String //用于获取临时参数
             switch other1{
             case "Product":
-//                let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
-//                let arr = linkUrl.componentsSeparatedByString("/")
-//                vc.hidesBottomBarWhenPushed = true
-//                vc.productId = (arr[3] as NSString).integerValue
-//                self.navigationController?.pushViewController(vc, animated: true)
+                //                let vc = HomeBuyGoodsDetailViewController.CreateFromMainStoryboard() as! HomeBuyGoodsDetailViewController
+                //                let arr = linkUrl.componentsSeparatedByString("/")
+                //                vc.hidesBottomBarWhenPushed = true
+                //                vc.productId = (arr[3] as NSString).integerValue
+                //                self.navigationController?.pushViewController(vc, animated: true)
                 
                 let vc = MyWebViewController()
                 vc.webUrl = linkUrl
@@ -778,8 +815,8 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 break
             case "Seckill":
                 break
-//            case "Topic":
-//                break
+                //            case "Topic":
+                //                break
             case "Coupon":
                 break
             default:
@@ -842,7 +879,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         var i = 0
         let btnBg = UIView(frame: CGRect(x: 0, y: 44, width: kScreenWidth, height: kScreenWidth * 280/750))
         btnBg.backgroundColor = UIColor(white: 1.0, alpha: 0.9)
-
+        
         
         self.下拉视窗.addSubview(btnBg)
         for title in menuTitles {
@@ -872,7 +909,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     }
     
     func setupNewNavigation() {
-
+        
         let imgViewL = UIImageView(frame: CGRect(x: 0, y: 0, width: 35*63/50, height: 35))
         imgViewL.image = UIImage(named: "kc")?.imageWithRenderingMode(.AlwaysOriginal)
         let leftItem = UIBarButtonItem(customView: imgViewL)
@@ -906,31 +943,54 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     
     
     //MARK: NetWork
-    func fetchData() {
-        ZMDTool.showActivityView(nil, inView: nil, 20)
-        let queue = dispatch_get_global_queue(0, 0)
-        dispatch_async(queue) { () -> Void in
-            QNNetworkTool.fetchMainPageInto { (advertisementAll, error, dictionary) -> Void in
-                if advertisementAll != nil {
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        self.advertisementAll = advertisementAll
+    func getCache() {
+        if let bannersData = HYNetworkCache.cacheJsonWithURL("HomeBanner"),bannersArr = ZMDAdvertisement.mj_objectArrayWithKeyValuesArray(bannersData) {
+            self.banners.removeAllObjects()
+            self.banners.addObjectsFromArray(bannersArr as [AnyObject])
+            self.currentTableView.reloadData()
+        }
+        if let categoriesData = HYNetworkCache.cacheJsonWithURL("MainCategories"),categories = ZMDXHYCategory.mj_objectArrayWithKeyValuesArray(categoriesData) {
+            self.currentTableView.reloadData()
+            self.categories.addObjectsFromArray(categories as [AnyObject])
+            for category in self.categories {
+                let category = category as! ZMDXHYCategory
+                if let dic = HYNetworkCache.cacheJsonWithURL("ProductsInCategory\(category.Id)") as? NSDictionary {
+                    if let products = ZMDProduct.mj_objectArrayWithKeyValuesArray(dic["Products"]) {
+                        self.dyadicProducts.addObject(products)
                         self.currentTableView.reloadData()
-                    })
+                    }
+                    if let widgetName = dic["WidgetName"] as? String,miniAdsData = HYNetworkCache.cacheJsonWithURL("AdInCategory\(widgetName)"), advertisements = ZMDAdvertisement.mj_objectArrayWithKeyValuesArray(miniAdsData) {
+                        self.miniAds.addObjectsFromArray(advertisements as [AnyObject])
+                        self.currentTableView.reloadData()
+                    }
                 }
             }
         }
-        self.fetchCategories()
     }
     
+    func fetchData() {
+        self.getCache()
+        if self.networkObserver.currentReachabilityStatus() == .NotReachable {
+            return
+        }
+        ZMDTool.showActivityView(nil, inView: nil, 10)
+        self.fetchTopBanner()
+        self.fetchCategories()
+    }
+    func fetchTopBanner() {
+        QNNetworkTool.fetchHomeBanner("Nc_index_carousel") { (banners, error, dictionary) -> Void in
+            if let banners = banners {
+                self.banners.removeAllObjects()
+                self.banners.addObjectsFromArray(banners as [AnyObject])
+                self.currentTableView.reloadData()
+            }
+        }
+    }
     func fetchCategories(){
         let queue1 = dispatch_queue_create("categoryQueue", DISPATCH_QUEUE_CONCURRENT)
         dispatch_async(queue1) { () -> Void in
             QNNetworkTool.fetchMainCategories { (categories, error) -> Void in
                 if let categories = categories {
-                    for _ in categories {
-                        //                    self.dyadicProducts.addObject(NSMutableArray)
-                        //                    self.widgetNames.addObject(NSMutableArray)
-                    }
                     self.requestDataNumber++
                     self.categories.removeAllObjects()
                     self.categories.addObjectsFromArray(categories as [AnyObject])
@@ -958,20 +1018,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                 if let products = products,widgetName = WidgetName {
                     self.dyadicProducts.addObject(products)
                     self.widgetNames.addObject(widgetName)
-                    var num = 0
-                    for name in self.widgetNames {
-                        if name as! String == widgetName {
-                            break
-                        }
-                        num++
-                    }
-                    if num == self.widgetNames.count-1 {
-                        self.fetchMiniAd(widgetName,group:group)
-                    }
+                    self.fetchMiniAd(widgetName, group: group)
                 }
-//                dispatch_group_leave(group)
             })
-            
         }
         
         dispatch_group_notify(group, dispatch_get_main_queue()) { () -> Void in
@@ -986,8 +1035,8 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             QNNetworkTool.fetchAdInCategory(widgetName) { (advertisements, error) -> Void in
                 dispatch_group_leave(group)
                 if let advertisements = advertisements {
+                    self.miniAds.addObjectsFromArray(advertisements as [AnyObject])
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        self.miniAds.addObjectsFromArray(advertisements as [AnyObject])
                         self.currentTableView.reloadData()
                     })
                 }else{
@@ -1026,7 +1075,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             self.advertisementClick(advertisement)
         }
     }
-
+    
     //MARK: - ***************Override***************
     //MARK: CommonAlert Action重写
     override func alertDestructiveAction() {

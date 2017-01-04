@@ -811,6 +811,7 @@
 		84CDE0F61E1258F50040D903 /* kc@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84CDE0F51E1258F50040D903 /* kc@3x.png */; };
 		84CDE0F81E126FED0040D903 /* 示例头像@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84CDE0F71E126FED0040D903 /* 示例头像@3x.png */; };
 		84CDE0FA1E126FFA0040D903 /* 示例头像@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84CDE0F91E126FFA0040D903 /* 示例头像@2x.png */; };
+		84D275371E1CDD5000D2D59F /* HYNetworkCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 84D275361E1CDD5000D2D59F /* HYNetworkCache.m */; };
 		84D70FDB1E134D2C00125A50 /* 我的收藏@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84D70FDA1E134D2C00125A50 /* 我的收藏@2x.png */; };
 		84D70FDD1E134D3C00125A50 /* 我的收藏@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84D70FDC1E134D3C00125A50 /* 我的收藏@3x.png */; };
 		84D70FE11E13565A00125A50 /* user_collections@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84D70FE01E13565A00125A50 /* user_collections@2x.png */; };
@@ -1696,6 +1697,8 @@
 		84CDE0F51E1258F50040D903 /* kc@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "kc@3x.png"; sourceTree = "<group>"; };
 		84CDE0F71E126FED0040D903 /* 示例头像@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "示例头像@3x.png"; sourceTree = "<group>"; };
 		84CDE0F91E126FFA0040D903 /* 示例头像@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "示例头像@2x.png"; sourceTree = "<group>"; };
+		84D275351E1CDD5000D2D59F /* HYNetworkCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HYNetworkCache.h; sourceTree = "<group>"; };
+		84D275361E1CDD5000D2D59F /* HYNetworkCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HYNetworkCache.m; sourceTree = "<group>"; };
 		84D70FDA1E134D2C00125A50 /* 我的收藏@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "我的收藏@2x.png"; sourceTree = "<group>"; };
 		84D70FDC1E134D3C00125A50 /* 我的收藏@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "我的收藏@3x.png"; sourceTree = "<group>"; };
 		84D70FE01E13565A00125A50 /* user_collections@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "user_collections@2x.png"; sourceTree = "<group>"; };
@@ -3054,6 +3057,7 @@
 		3C90987A1C76A6E9006B7D2C /* Librarys */ = {
 			isa = PBXGroup;
 			children = (
+				84D275341E1CDD5000D2D59F /* HYNetWorkCache */,
 				84B85F831DF6ACFB00DF79D1 /* pgySDK */,
 				84AB98231DE2A71B003E8253 /* TZImagePickerController */,
 				8446E60B1DD5A1C800889E9A /* XGPush */,
@@ -3492,6 +3496,15 @@
 				84B85F851DF6ACFB00DF79D1 /* PgyUpdate.framework */,
 			);
 			path = pgySDK;
+			sourceTree = "<group>";
+		};
+		84D275341E1CDD5000D2D59F /* HYNetWorkCache */ = {
+			isa = PBXGroup;
+			children = (
+				84D275351E1CDD5000D2D59F /* HYNetworkCache.h */,
+				84D275361E1CDD5000D2D59F /* HYNetworkCache.m */,
+			);
+			path = HYNetWorkCache;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -4317,6 +4330,7 @@
 				2B73D8611C86E0650016FEB2 /* RealAuthenticationViewController.swift in Sources */,
 				2BE372D91C891D7E004A1DDF /* ReleaseGoodsConfirmViewController.swift in Sources */,
 				2BA3FDBA1C9F8C0D00018F3C /* UIViewControllerExtensionForPop.swift in Sources */,
+				84D275371E1CDD5000D2D59F /* HYNetworkCache.m in Sources */,
 				3C9099111C76A6E9006B7D2C /* ChartMarker.swift in Sources */,
 				3C90994C1C76A6E9006B7D2C /* ChartYAxisRendererRadarChart.swift in Sources */,
 				3C90995D1C76A6E9006B7D2C /* NSString+AES.m in Sources */,

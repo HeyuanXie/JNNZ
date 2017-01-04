@@ -417,6 +417,18 @@ extension QNNetworkTool  {
 
 //MARK: 疆南农资首页相关数据
 extension QNNetworkTool {
+    /// 首页banner
+    class func fetchHomeBanner(name:String,completion:(banners:NSArray?,error:NSError?,dictionary:NSDictionary?) -> Void) {
+        requestGET(kServerAddress+"/api/v1/Advertisement/\(name)", parameters: nil) { (request, response, data, dictionary, error) -> Void in
+            guard let dic = dictionary,banners = ZMDAdvertisement.mj_objectArrayWithKeyValuesArray(dic["zones"]) else {
+                completion(banners: nil, error: error, dictionary: nil)
+                return
+            }
+            completion(banners: banners, error: nil, dictionary: dic)
+            HYNetworkCache.save_asyncJsonResponseToCacheFile(dic["zones"], andURL: "HomeBanner", completed: nil)
+        }
+        
+    }
     ///首页类别
     class func fetchMainCategories(completion:(categories:NSArray?,error:NSError?)-> Void) {
         requestGET(kServerAddress+"/api/v1/extend/product/HomepageCategories", parameters: nil) { (request, response, data, dictionary, error) -> Void in

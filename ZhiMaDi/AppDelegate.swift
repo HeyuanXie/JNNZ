@@ -22,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //配置分享
         ZMDShareSDKTool.startShare()
     
-        self.configPGY(launchOptions)
         self.configXGPush(launchOptions)
         
         // 开启推送服务
@@ -43,6 +42,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            window?.makeKeyAndVisible()
 //        }
         
+        if let lastDate = getObjectFromUserDefaults("openDate") as? NSDate {
+            if abs(lastDate.timeIntervalSinceNow) >= 2*24*60*60 {
+                HYNetworkCache.clearCache() //超过两天清理首页缓存
+            }
+        }
+        let date = NSDate()
+        saveObjectToUserDefaults("openDate", value: date)
         if let account = g_Account {
             if let password = g_Password {
                 QNNetworkTool.loginAjax(account, Password: password, completion: { (success, error, dictionary) -> Void in
@@ -146,21 +152,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    //MARK: - ************PrivateMethod************
-    //MARK:蒲公英SDK配置
-    func configPGY(launchOptions: [NSObject: AnyObject]?) {
-        if IS_DEBUG {
-            //启动基本SDK
-            PgyManager.sharedPgyManager().startManagerWithAppId(PGY_APPID)
-            //启动更新检查SDK
-            PgyUpdateManager.sharedPgyManager().startManagerWithAppId(PGY_APPID)
-            //关闭用户反馈,默认开启
-            PgyManager.sharedPgyManager().enableFeedback = false
-            //检测更新
-            PgyUpdateManager.sharedPgyManager().checkUpdate()
-        }
-    }
-    
+    //MARK: - ************PrivateMethod***********
     //MARK:信鸽推送SDK配置
     func configXGPush(launchOptions: [NSObject: AnyObject]?) {
         self.registerPushForIOS8()

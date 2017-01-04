@@ -625,7 +625,7 @@
                                     <action selector="agreeBtnCli:" destination="ZLp-yc-eEN" eventType="touchUpInside" id="8hd-ME-mFR"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="我已同意葫芦堡" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EAu-Ja-2mN" userLabel="Label  4f4f4f">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="我已同意咔村网" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EAu-Ja-2mN" userLabel="Label  4f4f4f">
                                 <rect key="frame" x="42" y="268" width="106" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="106" id="653-wL-e0E"/>

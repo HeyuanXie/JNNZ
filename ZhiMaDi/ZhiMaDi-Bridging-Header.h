@@ -61,4 +61,6 @@
 //蒲公英SDK
 #import <PgySDK/PgyManager.h>
 #import <PgyUpdate/PgyUpdateManager.h>
+
+#import "HYNetworkCache.h"
 #endif /* SleepCare_Bridging_Header_h */
