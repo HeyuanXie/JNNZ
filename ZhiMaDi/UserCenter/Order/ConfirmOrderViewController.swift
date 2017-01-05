@@ -770,7 +770,7 @@ class ConfirmOrderViewController: UIViewController,UITableViewDataSource,UITable
     }
     
     private func dataInit(){
-        self.userCenterData = [[.AddressSelect,.DSAddressSelect],[.Goods],[.GoodsCount,.Mark],/* [.Invoice,.InvoiceType,.InvoiceDetail,.InvoiceFor],*/[.UseDiscount]]
+        self.userCenterData = [[.AddressSelect,.DSAddressSelect],[.Goods],[.GoodsCount,.Mark],[.UseDiscount]]
     }
     //获取本订单的各种金额(商品金额、运费)
     func getTotal() {

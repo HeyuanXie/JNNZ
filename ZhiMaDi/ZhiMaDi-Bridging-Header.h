@@ -58,9 +58,6 @@
 #import "XGPush.h"
 //图片选择器
 #import "TZImagePickerController.h"
-//蒲公英SDK
-#import <PgySDK/PgyManager.h>
-#import <PgyUpdate/PgyUpdateManager.h>
 
 #import "HYNetworkCache.h"
 #endif /* SleepCare_Bridging_Header_h */

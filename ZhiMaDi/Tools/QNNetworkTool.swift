@@ -441,6 +441,7 @@ extension QNNetworkTool {
                     }
                     let categories = ZMDXHYCategory.mj_objectArrayWithKeyValuesArray(array)
                     completion(categories: categories, error: nil)
+                    HYNetworkCache.save_asyncJsonResponseToCacheFile(array, andURL: "MainCategories", completed: nil)
                 }catch{
                     println("JSON解析失败")
                 }
@@ -458,6 +459,7 @@ extension QNNetworkTool {
                 return
             }
             completion(products: products, WidgetName: WidgetName, error: nil)
+            HYNetworkCache.save_asyncJsonResponseToCacheFile(dic, andURL: "ProductsInCategory\(categoryId)", completed: nil)
         }
     }
     
@@ -469,6 +471,7 @@ extension QNNetworkTool {
                 return
             }
             completion(advertisements: advertisements, error: nil)
+            HYNetworkCache.save_asyncJsonResponseToCacheFile(dic["zones"], andURL: "AdInCategory\(widgetName)", completed: nil)
         }
     }
     
@@ -888,7 +891,7 @@ extension QNNetworkTool {
     ShippingStatusId: 发货状态
     */
     class func fetchOrder(urlStr:String,completion: ( value: NSArray?,error: NSError?) -> Void) {
-        var str = (kOdataAddress + urlStr).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        let str = (kOdataAddress + urlStr).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
         let url = NSURL(string:str)
         request(self.productRequest(url, method: "GET")).responseString { (response) -> Void in
             guard let data = response.result.value else {

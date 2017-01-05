@@ -65,7 +65,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             case .HomeContentTypeAd :
                 return kScreenWidth * 280 / 750
             case .HomeContentTypeMenu :
-                return 2*kScreenWidth * 210 / 750 / kScreenHeightZoom
+                return 2*kScreenWidth * 210 / 750
             case .HomeContentTypeGoods :
                 return kScreenWidth * 430 / 750
             case .HomeContentTypeRecommendationHead:
@@ -199,7 +199,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         super.viewWillAppear(true)
         self.tabBarController!.tabBar.hidden = false
         self.setupNewNavigation()
-        //检测版本更新
+        //检测版本更新，当首页第二次出现时检测
         if APP_HOMEPAGELAUNCHTIMES == 1 {
             self.checkUpdate()
         }
@@ -266,9 +266,10 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         return headView
     }
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        if indexPath.section == 1{
-            return self.menuDatas.count > 5 ? zoom(210) : zoom(105)
-        }
+        //采用AutoMenuCell时的高度
+//        if indexPath.section == 1{
+//            return self.menuDatas.count > 5 ? zoom(210) : zoom(105)
+//        }
         if indexPath.section > 1 {
             switch indexPath.row {
             case 0 :
@@ -483,7 +484,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
             
             for var i=0;i<10;i++ {
                 _ = 0
-                let btnHeight = kScreenWidth * 210 / 750 / kScreenHeightZoom
+                let btnHeight = kScreenWidth * 210 / 750
                 let width = kScreenWidth/5
                 let btn = UIButton(frame: CGRectMake(kScreenWidth/5*CGFloat(i%5), btnHeight*CGFloat(i/5) ,width, btnHeight))
                 btn.tag = 10000 + i
@@ -1012,7 +1013,6 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         let group = dispatch_group_create()
         for category in categories {
             let category = category as! ZMDXHYCategory
-            dispatch_group_enter(group)
             sleep(1)
             QNNetworkTool.fetchProductsInCategory(5, categoryId: category.Id.integerValue, completion: { (products, WidgetName, error) -> Void in
                 if let products = products,widgetName = WidgetName {
@@ -1033,7 +1033,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         let queue = dispatch_queue_create("miniAdQueue", DISPATCH_QUEUE_CONCURRENT)
         dispatch_async(queue) { () -> Void in
             QNNetworkTool.fetchAdInCategory(widgetName) { (advertisements, error) -> Void in
-                dispatch_group_leave(group)
+//                dispatch_group_leave(group)
                 if let advertisements = advertisements {
                     self.miniAds.addObjectsFromArray(advertisements as [AnyObject])
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
