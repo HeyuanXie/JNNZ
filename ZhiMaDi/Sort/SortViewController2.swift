@@ -224,7 +224,6 @@ class SortViewController2: UIViewController,UITableViewDataSource, UITableViewDe
         })
     }
     
-    
     //MARK: dataINit()
     func dataInit() {
         var text = ""
