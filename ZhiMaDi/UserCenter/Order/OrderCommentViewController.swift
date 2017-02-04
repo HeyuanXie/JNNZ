@@ -10,7 +10,7 @@ import UIKit
 import MWPhotoBrowser
 
 class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,UITextViewDelegate,ZMDInterceptorProtocol,MWPhotoBrowserDelegate/*,TZImagePickerControllerDelegate*/ {
-
+    
     var isCommented = false    //区分返回按钮 调到那个页面
     
     var currentTableView: UITableView!
@@ -43,7 +43,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
     //MARK:--TZImagePicker相关属性
     var maxImagesCount = 5
     var isSelectOriginalPhoto = true
-
+    
     //记录选中的图片
     var photos = NSMutableArray()       //二维数组
     var selectedAssets = NSMutableArray()   //二维
@@ -57,18 +57,18 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         super.viewDidLoad()
         self.updateData()
         self.subViewInit()
-
+        
         // Do any additional setup after loading the view.
     }
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
-
+        
     }
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(true)
         
     }
-
+    
     
     //MARK: -PrivateMethod
     //MARK: 初始化UI
@@ -84,7 +84,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         self.currentTableView.bounces = false
         self.currentTableView.backgroundColor = RGB(246,246,246,1.0)
         self.view.addSubview(self.currentTableView)
-
+        
         let botView = self.configFootView()
         self.view.addSubview(botView)
         botView.snp_makeConstraints { (make) -> Void in
@@ -148,7 +148,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
             arr.addObject(dic)
         }
         let params = ["customerId":g_customerId!,"reviews":arr]
-
+        
         //1.文字、rate评价 -> 晒图
         QNNetworkTool.addComments(params as NSDictionary) { (success, error, productReviews) -> Void in
             if success! {
@@ -170,7 +170,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
                                     if succeed == true {
                                         
                                     }else{
-//                                        ZMDTool.showErrorPromptView(nil, error: error, errorMsg: "上传图片失败")
+                                        //                                        ZMDTool.showErrorPromptView(nil, error: error, errorMsg: "上传图片失败")
                                     }
                                 })
                             })
@@ -186,16 +186,16 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
                 self.commonAlertShow(false, title: "评价失败", message: "评论失败,请稍后再试!", preferredStyle: .Alert)
             }
         }
-
+        
         
         //2.店铺评分
-        /*QNNetworkTool.addStoreComments(self.descriptionPoint, service: self.servicePoint, logistics: self.logisticsPoint, orderId: self.orderId.integerValue, customerId: g_customerId!) { (success, error) -> Void in
+        QNNetworkTool.addStoreComments(self.descriptionPoint, service: self.servicePoint, logistics: self.logisticsPoint, orderId: self.orderId.integerValue, customerId: g_customerId!) { (success, error) -> Void in
             if success! {
                 
             }else{
                 ZMDTool.showErrorPromptView(nil, error: nil, errorMsg: error)
             }
-        }*/
+        }
     }
     
     //MARK: -UITextViewDelegate
@@ -204,10 +204,6 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         mulStr.replaceCharactersInRange(range, withString: text)
         submitBtn.backgroundColor = mulStr.length == 0 ? grayButtonBackgroundColor : defaultSelectColor
         submitBtn.userInteractionEnabled = mulStr.length == 0 ? false : true
-        
-        let section = textView.tag
-        let frame = textView.frame
-        let size = (mulStr as! String).sizeWithFont(UIFont.systemFontOfSize(15), maxWidth: frame.width)
         return true
     }
     
@@ -215,7 +211,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         let label = textView.viewWithTag(10000) as! UILabel
         label.hidden = textView.text != ""
     }
-
+    
     func textViewDidEndEditing(textView: UITextView) {
         let section = textView.tag
         self.comments.replaceObjectAtIndex(section, withObject: textView.text)
@@ -237,6 +233,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
     //MARK: - MWPhotoBrowserDelegate
     func numberOfPhotosInPhotoBrowser(photoBrowser: MWPhotoBrowser!) -> UInt {
         let photos = self.photos[self.photoIndex]
+        //        return photos.count
         return UInt(photos.count)
     }
     func photoBrowser(photoBrowser: MWPhotoBrowser!, photoAtIndex index: UInt) -> MWPhotoProtocol! {
@@ -274,7 +271,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
     }
     
     
-
+    
     //MARK: - TableViewCell
     //MARK: --HeaderViewBg更新UI
     func updateHeaderViewBg(headerViewBg:UIView,review:ZMDProductComment) {
@@ -352,7 +349,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         }
         botView.addSubview(submitBtn)
         ZMDTool.configViewLayerWithSize(submitBtn, size: 25)
-
+        
         return botView
     }
     
@@ -414,21 +411,14 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         headViewBg.addSubview(imgView)
         imgView.tag = 10001
         //评论
-        let scoreTextView = ZMDTool.getTextView(CGRect(x: padding+75+5, y: 12, width: CGRectGetWidth(headViewBg.frame)-5*2-75-padding, height: 130), placeholder: "感谢您的宝贵评价~", fontSize: 15)
+        let scoreTextView = ZMDTool.getTextView(CGRect(x: padding+75+5, y: 12, width: CGRectGetWidth(headViewBg.frame)-5*2-75-padding, height: 130), placeholder: "感谢您的宝贵评价~", fontSize: 16)
         scoreTextView.delegate = self
-        scoreTextView.scrollEnabled = false
         headViewBg.addSubview(scoreTextView)
         scoreTextView.tag = section
         //买家秀
         let photoView = UIView(frame: CGRect(x: 0, y: 130, width: kScreenWidth-24, height: 116))
         photoView.backgroundColor = UIColor.clearColor()
         headViewBg.addSubview(photoView)
-        photoView.snp_makeConstraints { (make) -> Void in
-            make.top.equalTo(scoreTextView.snp_bottom).offset(0)
-            make.left.equalTo(0)
-            make.right.equalTo(0)
-            make.height.equalTo(116)
-        }
         photoView.tag = 10003
         //差评、中评、好评
         let faceScoreView = UIView(frame: CGRect(x: 0, y: 140+116, width: kScreenWidth-24, height: 60))
@@ -525,7 +515,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
                 let headViewBg = photoView.superview!
                 headViewBg.set("h", value: 250+60)
                 photoView.set("h", value: 116)
-
+                
                 if i==2 {   //第三张图片添加后就换行
                     y = y+75+10
                     x = padding
@@ -583,7 +573,7 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         }
         faceScoreView.addSubview(ZMDTool.getLine(CGRect(x: 0, y: 0, width: CGRectGetWidth(faceScoreView.frame), height: 0.5), backgroundColor: defaultLineColor))
         let titles = ["好评","中评","差评"]
-        let images = [("user_pingfen_unselected","user_pingfen_selected"),("user_pingfen_unselected","user_pingfen_selected"),("user_pingfen_unselected","user_pingfen_selected")]
+        let images = [("good_normal","good_select"),("soso_normal","soso_select"),("bad_normal","bad_select")]
         let width = faceScoreView.frame.width/3
         for i in 0..<3 {
             let faceBtn = UIButton(type: .Custom)
@@ -628,15 +618,6 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
             //放弃评价，回到上一级
             self.navigationController?.popViewControllerAnimated(true)
         }
-    }
-
-    //MAKR:Override CommonAlertView
-    override func alertDestructiveAction() {
-        self.back()
-    }
-    
-    override func alertSingleAction() {
-        self.back()
     }
     
     override func didReceiveMemoryWarning() {
