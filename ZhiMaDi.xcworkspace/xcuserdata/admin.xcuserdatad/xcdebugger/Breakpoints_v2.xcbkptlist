@@ -168,12 +168,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Home/HomeBuyListViewController.swift"
-                  timestampString = "507890074.681112"
+                  timestampString = "507959175.946654"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "151"
                   endingLineNumber = "151"
-                  offsetFromSymbolStart = "1236">
+                  offsetFromSymbolStart = "1301">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -183,12 +183,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Home/HomeBuyListViewController.swift"
-                  timestampString = "507890074.681258"
+                  timestampString = "507959175.946834"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "152"
                   endingLineNumber = "152"
-                  offsetFromSymbolStart = "32">
+                  offsetFromSymbolStart = "27">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -354,12 +354,12 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Tools/QNNetworkTool.swift"
-                  timestampString = "507890074.686149"
+                  timestampString = "507959175.953541"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "873"
                   endingLineNumber = "873"
-                  offsetFromSymbolStart = "56">
+                  offsetFromSymbolStart = "60">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -369,30 +369,14 @@
                   moduleName = "ZhiMaDi"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/admin/Desktop/JNNZ/ZhiMaDi/Tools/QNNetworkTool.swift"
-                  timestampString = "507890074.686282"
+                  timestampString = "507959175.953672"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "873"
                   endingLineNumber = "873"
-                  offsetFromSymbolStart = "40">
+                  offsetFromSymbolStart = "39">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ZhiMaDi/UserCenter/MineSet/PersonInfoViewController.swift"
-            timestampString = "507872367.093804"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "267"
-            endingLineNumber = "267"
-            landmarkName = "imagePickerController(_:didFinishPickingImage:editingInfo:)"
-            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
