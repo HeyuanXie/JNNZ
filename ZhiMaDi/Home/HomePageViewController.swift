@@ -841,7 +841,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     
     func setupNewNavigation() {
         
-        let imgViewL = UIImageView(frame: CGRect(x: 0, y: 0, width: 35*63/50, height: 35))
+        let imgViewL = UIImageView(frame: CGRect(x: 0, y: 0, width: 35, height: 35))
         imgViewL.image = UIImage(named: "kc")?.imageWithRenderingMode(.AlwaysOriginal)
         let leftItem = UIBarButtonItem(customView: imgViewL)
         leftItem.customView?.tintColor = UIColor.whiteColor()

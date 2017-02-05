@@ -226,9 +226,7 @@ class MineHomeViewController: UIViewController,UITableViewDataSource, UITableVie
                 ZMDTool.configViewLayerWithSize(personImgV, size: 42)
                 if !g_isLogin {
                     personImgV.image = UIImage(named: "示例头像")
-                }else if let urlStr = g_customer?.Avatar?.AvatarUrl where urlStr != "" {
-                    SDImageCache.sharedImageCache().removeImageForKey(urlStr)
-                    let url = NSURL(string: urlStr)
+                }else if let urlStr = g_customer?.Avatar?.AvatarUrl, url = NSURL(string: urlStr) {
                     personImgV.sd_setImageWithURL(url, placeholderImage: UIImage(named: "示例头像"))
                 }
             }
