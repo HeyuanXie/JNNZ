@@ -620,6 +620,14 @@ class OrderCommentViewController: UIViewController,UITableViewDelegate,UITableVi
         }
     }
     
+    override func alertSingleAction() {
+        if let viewControllers = self.navigationController?.viewControllers where viewControllers.count > 1 {
+            self.navigationController?.popToRootViewControllerAnimated(true)
+        }else{
+            self.dismissViewControllerAnimated(true, completion: nil)
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
