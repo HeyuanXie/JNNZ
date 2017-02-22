@@ -850,6 +850,7 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         
         let textInput = UITextField(frame: CGRect(x: 0, y: 0, width: kScreenWidth - 135, height: 35))
         textInput.placeholder = "商品关键字"
+        textInput.returnKeyType = .Search
         textInput.backgroundColor = RGB(235, 235, 235, 1)
         ZMDTool.configViewLayerWithSize(textInput, size: 15)
         textInput.delegate = self
