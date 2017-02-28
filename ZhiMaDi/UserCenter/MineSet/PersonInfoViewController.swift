@@ -437,6 +437,9 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
     
     //清理缓存
     func clearCache() {
+        //清除首页缓存
+        HYNetworkCache.clearCache();
+        
         // 取出cache文件夹目录 缓存文件都在这个目录下
         let cachePath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomainMask.UserDomainMask, true).first
         // 取出文件夹下所有文件数组
@@ -455,9 +458,6 @@ class PersonInfoViewController:UIViewController,UITableViewDataSource, UITableVi
             SDImageCache.sharedImageCache().clearDisk()
         }
     }
-
-    
-    
 }
 
 

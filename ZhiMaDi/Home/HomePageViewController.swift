@@ -353,8 +353,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         let scrollView = cell?.viewWithTag(10001) as! UIScrollView
         //******cell != nil 时为scrollView设置contentSize
         scrollView.contentSize = CGSize(width: width * menuTitles.count, height: height)
-        for subView in scrollView.subviews {
-            subView.removeFromSuperview()
+        let subviews = scrollView.subviews
+        for subview in subviews {
+            subview.removeFromSuperview()
         }
         var i = 0
         for title in menuTitles {
@@ -507,8 +508,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         }
         let scrollView = cell?.viewWithTag(kTagScrollView) as! UIScrollView
         if let advertisements = self.advertisementAll,let guess = advertisements.guess {
-            for subView in scrollView.subviews {
-                subView.removeFromSuperview()
+            let subviews = scrollView.subviews
+            for subview in subviews {
+                subview.removeFromSuperview()
             }
             scrollView.contentSize = CGSize(width: (136 + 10) * CGFloat(guess.count), height: 180)
             for var i=0;i<guess.count;i++ {
@@ -785,8 +787,9 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     func updateViewForNextMenu()  {
         let menuTitles = self.categories
         if self.下拉视窗 != nil {
-            for subV in self.下拉视窗.subviews {
-                subV.removeFromSuperview()
+            let subviews = self.下拉视窗.subviews
+            for subview in subviews {
+                subview.removeFromSuperview()
             }
         }
         
@@ -906,34 +909,54 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
     }
     
     func fetchData() {
-        self.getCache()
         if self.networkObserver.currentReachabilityStatus() == .NotReachable {
+            self.getCache()
             return
         }
-        ZMDTool.showActivityView(nil, inView: nil, 10)
-        self.fetchTopBanner()
-        self.fetchDaoHang()
-        self.fetchCategories()
+        ZMDTool.showActivityView(nil)
+        
+        let semaphore = dispatch_semaphore_create(0)
+        let group = dispatch_group_create()
+        let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+        
+        dispatch_group_async(group, queue) { () -> Void in
+            self.fetchTopBanner(semaphore)
+        }
+        dispatch_group_async(group, queue) { () -> Void in
+            self.fetchDaoHang(semaphore)
+        }
+        dispatch_group_async(group, queue) { () -> Void in
+            self.fetchCategories(semaphore)
+        }
+        dispatch_group_notify(group, queue) { () -> Void in
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+            ZMDTool.hiddenActivityView()
+        }
     }
-    func fetchTopBanner() {
+    
+    func fetchTopBanner(semaphore:dispatch_semaphore_t) {
         QNNetworkTool.fetchHomeMiniAd("Nc_index_carousel") { (ads, error, dictionary) -> Void in
             if let banners = ads {
                 self.banners.removeAllObjects()
                 self.banners.addObjectsFromArray(banners as [AnyObject])
                 self.currentTableView.reloadData()
             }
+            dispatch_semaphore_signal(semaphore)
         }
     }
-    func fetchDaoHang() {
+    func fetchDaoHang(semaphore:dispatch_semaphore_t) {
         QNNetworkTool.fetchHomeMiniAd("mbkc_index_nav") { (ads, error, dictionary) -> Void in
             if let menus = ads {
                 self.menus.removeAllObjects()
                 self.menus.addObjectsFromArray(menus as [AnyObject])
                 self.currentTableView.reloadData()
             }
+            dispatch_semaphore_signal(semaphore)
         }
     }
-    func fetchCategories(){
+    func fetchCategories(semaphore:dispatch_semaphore_t){
         let queue1 = dispatch_queue_create("categoryQueue", DISPATCH_QUEUE_CONCURRENT)
         dispatch_async(queue1) { () -> Void in
             QNNetworkTool.fetchMainCategories { (categories, error) -> Void in
@@ -947,8 +970,8 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
                     }
                 }else{
                     ZMDTool.showErrorPromptView(nil, error: error)
-                    
                 }
+                dispatch_semaphore_signal(semaphore)
             }
         }
     }
@@ -979,7 +1002,6 @@ class HomePageViewController: UIViewController,UITableViewDataSource,UITableView
         let queue = dispatch_queue_create("miniAdQueue", DISPATCH_QUEUE_CONCURRENT)
         dispatch_async(queue) { () -> Void in
             QNNetworkTool.fetchAdInCategory(widgetName) { (advertisements, error) -> Void in
-//                dispatch_group_leave(group)
                 if let advertisements = advertisements {
                     self.miniAds.addObjectsFromArray(advertisements as [AnyObject])
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
